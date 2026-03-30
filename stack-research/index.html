@@ -1,0 +1,1383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Terminal Stack Research — AI-Native Dev Setup 2026</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --bg2: #161b22;
+      --bg3: #21262d;
+      --border: #30363d;
+      --text: #e6edf3;
+      --muted: #8b949e;
+      --blue: #58a6ff;
+      --green: #3fb950;
+      --yellow: #d29922;
+      --orange: #f0883e;
+      --purple: #bc8cff;
+      --red: #f85149;
+      --cyan: #56d364;
+      --tag-bg: #1f3447;
+      --tag-text: #58a6ff;
+      --code-bg: #161b22;
+      --nav-bg: rgba(15,17,23,0.95);
+      --hero-bg-a: #0d1117;
+      --hero-bg-b: #161b22;
+    }
+
+    [data-theme="light"] {
+      --bg: #ffffff;
+      --bg2: #f6f8fa;
+      --bg3: #eaeef2;
+      --border: #d0d7de;
+      --text: #1f2328;
+      --muted: #656d76;
+      --blue: #0969da;
+      --green: #1a7f37;
+      --yellow: #9a6700;
+      --orange: #bc4c00;
+      --purple: #8250df;
+      --red: #d1242f;
+      --cyan: #1a7f37;
+      --tag-bg: #ddf4ff;
+      --tag-text: #0969da;
+      --code-bg: #f6f8fa;
+      --nav-bg: rgba(255,255,255,0.95);
+      --hero-bg-a: #f6f8fa;
+      --hero-bg-b: #eaeef2;
+    }
+
+    /* ── LIGHT THEME OVERRIDES (hardcoded dark values) ── */
+    [data-theme="light"] pre {
+      background: #f6f8fa;
+      border-color: #d0d7de;
+      color: #24292f;
+    }
+    [data-theme="light"] code {
+      background: #eaeef2;
+      border-color: #d0d7de;
+      color: #bc4c00;
+    }
+    [data-theme="light"] tr:hover td { background: rgba(0,0,0,0.03); }
+
+    /* Pills */
+    [data-theme="light"] .pill.blue   { background: #ddf4ff; border-color: #84caff; }
+    [data-theme="light"] .pill.green  { background: #dafbe1; border-color: #6fdd8b; }
+    [data-theme="light"] .pill.yellow { background: #fff8c5; border-color: #d4a72c; }
+    [data-theme="light"] .pill.purple { background: #fbefff; border-color: #c4a0f5; }
+    [data-theme="light"] .pill.orange { background: #fff1e5; border-color: #f08; border-color: rgba(240,136,62,0.5); }
+
+    /* Callouts */
+    [data-theme="light"] .callout.tip  { background: #dafbe1; border-color: #1a7f37; }
+    [data-theme="light"] .callout.info { background: #ddf4ff; border-color: #0969da; }
+    [data-theme="light"] .callout.warn { background: #fff8c5; border-color: #9a6700; }
+
+    /* Badges */
+    [data-theme="light"] .badge.new     { background: #dafbe1; color: #1a7f37; border-color: #6fdd8b; }
+    [data-theme="light"] .badge.rec     { background: #ddf4ff; color: #0969da; border-color: #84caff; }
+    [data-theme="light"] .badge.warn    { background: #fff1e5; color: #bc4c00; border-color: rgba(240,136,62,0.5); }
+    [data-theme="light"] .badge.current { background: #fbefff; color: #8250df; border-color: #c4a0f5; }
+
+    /* Source links */
+    [data-theme="light"] .source-link       { background: #ddf4ff; border-color: #84caff; }
+    [data-theme="light"] .source-link:hover { background: #b6e3ff; }
+
+    /* Section icons — lighten the dark pill backgrounds */
+    [data-theme="light"] .section-icon { filter: brightness(3.5) saturate(0.4); }
+
+    /* Decision cards */
+    [data-theme="light"] .decision-card .choose.current { color: #1a7f37; }
+
+    /* Binding key color */
+    [data-theme="light"] .binding-row .key { color: #bc4c00; }
+
+    /* Score cards stars readable */
+    [data-theme="light"] .score-card .stars { color: #0969da; }
+
+    /* Priority number stays vivid */
+    [data-theme="light"] .priority-num { background: #0969da; }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      font-size: 15px;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--nav-bg);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      height: 52px;
+      overflow-x: auto;
+    }
+
+    nav .brand {
+      font-weight: 700;
+      color: var(--text);
+      font-size: 14px;
+      white-space: nowrap;
+      margin-right: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    nav .brand span { color: var(--blue); }
+
+    nav a {
+      text-decoration: none;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 500;
+      padding: 6px 12px;
+      border-radius: 6px;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+    nav a:hover { color: var(--text); background: var(--bg3); }
+    nav a.active { color: var(--blue); background: var(--tag-bg); }
+
+    /* ── HERO ── */
+    .hero {
+      background: linear-gradient(135deg, var(--hero-bg-a) 0%, var(--hero-bg-b) 50%, var(--hero-bg-a) 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 56px 24px 48px;
+      text-align: center;
+    }
+
+    .hero h1 {
+      font-size: 32px;
+      font-weight: 800;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+      color: var(--muted);
+      font-size: 16px;
+      max-width: 580px;
+      margin: 0 auto 28px;
+    }
+
+    .stack-pills {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 32px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      border: 1px solid;
+    }
+    .pill.blue { background: #0d2137; border-color: #1e4a6e; color: var(--blue); }
+    .pill.green { background: #0d2818; border-color: #1e5c35; color: var(--green); }
+    .pill.yellow { background: #2a1f00; border-color: #6a4f00; color: var(--yellow); }
+    .pill.purple { background: #1e1040; border-color: #4a2a8a; color: var(--purple); }
+    .pill.orange { background: #2a1500; border-color: #6a3800; color: var(--orange); }
+
+    .score-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .score-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      text-align: left;
+    }
+
+    .score-card .label { font-size: 11px; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .score-card .stars { font-size: 16px; }
+    .score-card .note { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+    /* ── SECTIONS ── */
+    .section {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 48px 24px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+
+    .section-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .section-header h2 {
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .section-header p {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 2px;
+    }
+
+    /* ── CARDS ── */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      transition: border-color 0.15s;
+    }
+    .card:hover { border-color: #444d56; }
+
+    .card-title {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .badge {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .badge.new { background: #0d2818; color: var(--green); border: 1px solid #1e5c35; }
+    .badge.rec { background: #0d2137; color: var(--blue); border: 1px solid #1e4a6e; }
+    .badge.warn { background: #2a1500; color: var(--orange); border: 1px solid #6a3800; }
+    .badge.current { background: #1e1040; color: var(--purple); border: 1px solid #4a2a8a; }
+
+    .card p { font-size: 13px; color: var(--muted); margin-bottom: 10px; }
+
+    /* ── CODE BLOCKS ── */
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      overflow-x: auto;
+      font-size: 12px;
+      font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, monospace;
+      line-height: 1.6;
+      color: var(--text);
+      margin: 10px 0;
+    }
+
+    code {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-size: 12px;
+      font-family: 'JetBrains Mono', 'Fira Code', Menlo, monospace;
+      color: #f0883e;
+    }
+
+    /* ── TABLES ── */
+    .table-wrap { overflow-x: auto; margin: 16px 0; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th {
+      background: var(--bg3);
+      color: var(--muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 0.5px;
+      padding: 10px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255,255,255,0.02); }
+
+    .check { color: var(--green); }
+    .cross { color: var(--red); }
+    .warn-icon { color: var(--yellow); }
+
+    /* ── SOURCES ── */
+    .sources {
+      margin-top: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .source-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      color: var(--blue);
+      text-decoration: none;
+      background: var(--tag-bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 2px 8px;
+      transition: all 0.15s;
+    }
+    .source-link:hover { background: #1e4a6e; }
+
+    /* ── CALLOUTS ── */
+    .callout {
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin: 16px 0;
+      font-size: 13px;
+      border-left: 3px solid;
+      display: flex;
+      gap: 10px;
+    }
+    .callout.tip { background: #0d2818; border-color: var(--green); }
+    .callout.info { background: #0d2137; border-color: var(--blue); }
+    .callout.warn { background: #2a1f00; border-color: var(--yellow); }
+    .callout .icon { flex-shrink: 0; font-size: 16px; }
+    .callout p { margin: 0; color: var(--text); }
+
+    /* ── DECISION MATRIX ── */
+    .decision-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 12px;
+      margin: 16px 0;
+    }
+
+    .decision-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+    }
+    .decision-card .if { font-size: 11px; color: var(--muted); margin-bottom: 4px; text-transform: uppercase; }
+    .decision-card .choose { font-size: 14px; font-weight: 700; color: var(--text); }
+    .decision-card .choose.current { color: var(--green); }
+    .decision-card .note { font-size: 12px; color: var(--muted); margin-top: 6px; }
+
+    /* ── BINDING GRID ── */
+    .binding-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
+      margin: 16px 0;
+    }
+
+    .binding-section {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+    }
+
+    .binding-section h4 {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--blue);
+      margin-bottom: 10px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .binding-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 4px 0;
+      gap: 8px;
+      font-size: 12px;
+    }
+    .binding-row .key { font-family: 'JetBrains Mono', monospace; color: var(--orange); flex-shrink: 0; }
+    .binding-row .desc { color: var(--muted); text-align: right; }
+
+    /* ── PRIORITY LIST ── */
+    .priority-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin: 16px 0;
+    }
+
+    .priority-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 13px;
+    }
+
+    .priority-num {
+      min-width: 24px;
+      height: 24px;
+      background: var(--blue);
+      color: #000;
+      font-weight: 800;
+      font-size: 12px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .priority-list li a { color: var(--blue); text-decoration: none; }
+    .priority-list li a:hover { text-decoration: underline; }
+    .priority-list li .item-desc { color: var(--muted); font-size: 12px; margin-top: 2px; }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 32px 24px;
+      color: var(--muted);
+      font-size: 12px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ── TABS ── */
+    .tab-group { margin-bottom: 24px; }
+    .tab-buttons { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+    .tab-btn {
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 500;
+      padding: 8px 16px;
+      cursor: pointer;
+      margin-bottom: -1px;
+      transition: all 0.15s;
+    }
+    .tab-btn.active { color: var(--blue); border-bottom-color: var(--blue); }
+    .tab-btn:hover { color: var(--text); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── GRID 2-COL ── */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+    @media (max-width: 700px) { .grid-2 { grid-template-columns: 1fr; } }
+
+    h3 {
+      font-size: 16px;
+      font-weight: 700;
+      margin: 24px 0 12px;
+      color: var(--text);
+    }
+
+    p { margin-bottom: 10px; color: var(--text); }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="../home/" style="color:var(--muted); text-decoration:none; font-size:13px; white-space:nowrap; margin-right:8px;">← Home</a>
+  <div class="brand">⌨️ <span>StackResearch</span></div>
+  <button id="theme-toggle" aria-label="Toggle light/dark theme" title="Toggle theme" style="margin-left:auto; margin-right:8px; background:var(--bg3); border:1px solid var(--border); color:var(--text); border-radius:6px; padding:5px 10px; cursor:pointer; font-size:14px; flex-shrink:0;"><span id="theme-icon">🌙</span></button>
+  <a href="#optimize" class="active">Optimize Stack</a>
+  <a href="#alternatives">Alternatives</a>
+  <a href="#universal-vim">Universal Vim</a>
+  <a href="#ai-native">AI-Native</a>
+  <a href="#quick-ref">Quick Ref</a>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <h1>Terminal Stack Research 2026</h1>
+  <p>Deep research on keybinding configs, alternative stacks, universal Vim grammar, and AI-native workflows for Gen AI roles.</p>
+
+  <div class="stack-pills">
+    <span class="pill blue">Ghostty</span>
+    <span class="pill green">tmux</span>
+    <span class="pill yellow">Zsh + zsh-vi-mode</span>
+    <span class="pill purple">Neovim + LazyVim</span>
+    <span class="pill orange">Claude Code CLI</span>
+  </div>
+
+  <div class="score-grid">
+    <div class="score-card">
+      <div class="label">Model Invocation</div>
+      <div class="stars">★★★★★</div>
+      <div class="note">Claude Code is terminal-native</div>
+    </div>
+    <div class="score-card">
+      <div class="label">Context Switching</div>
+      <div class="stars">★★★★★</div>
+      <div class="note">tmux panes are the fastest</div>
+    </div>
+    <div class="score-card">
+      <div class="label">Session Persistence</div>
+      <div class="stars">★★★★★</div>
+      <div class="note">tmux's killer feature</div>
+    </div>
+    <div class="score-card">
+      <div class="label">Multi-Agent</div>
+      <div class="stars">★★★★☆</div>
+      <div class="note">Agent Teams work; layout issues</div>
+    </div>
+    <div class="score-card">
+      <div class="label">File Hot-Reload</div>
+      <div class="stars">★★★☆☆</div>
+      <div class="note">Requires config</div>
+    </div>
+    <div class="score-card">
+      <div class="label">Resource Overhead</div>
+      <div class="stars">★★★★★</div>
+      <div class="note">Ghostty &lt;100MB vs Electron</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 1: OPTIMIZE YOUR STACK
+═══════════════════════════════════════════════ -->
+<section class="section" id="optimize">
+  <div class="section-header">
+    <div class="section-icon" style="background:#0d2137;">⚙️</div>
+    <div>
+      <h2>Optimize Your Stack</h2>
+      <p>Community-sourced best practices for Ghostty + tmux + Zsh/zsh-vi-mode + Neovim/LazyVim</p>
+    </div>
+  </div>
+
+  <!-- Prefix Key -->
+  <h3>1 — tmux Prefix Key</h3>
+  <div class="callout tip">
+    <span class="icon">💡</span>
+    <p><strong>Community recommendation: switch to <code>Ctrl-Space</code></strong> — mirrors your Neovim <code>&lt;Space&gt;</code> leader, no shell readline conflicts, no Vim conflicts.</p>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Prefix</th><th>Pros</th><th>Cons</th><th>Verdict</th></tr></thead>
+      <tbody>
+        <tr><td><code>Ctrl-b</code> (default)</td><td>No initial conflicts</td><td>Awkward stretch; conflicts with Vim <code>Ctrl-b</code> page-up</td><td>—</td></tr>
+        <tr><td><code>Ctrl-a</code> (popular)</td><td>Ergonomic; GNU Screen familiar</td><td>Conflicts with shell "go to beginning of line"</td><td>—</td></tr>
+        <tr><td><code>Ctrl-Space</code></td><td>Easy to hit; mirrors <code>&lt;Space&gt;</code> leader; no shell conflicts</td><td>Some IME conflicts</td><td><span class="check">✓ Recommended</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="sources">
+    <a class="source-link" href="https://dev.to/reprintsev/my-favorite-tmux-prefix-2618" target="_blank">dev.to</a>
+    <a class="source-link" href="https://koenwoortman.com/tmux-prefix-ctrl-space/" target="_blank">koenwoortman.com</a>
+    <a class="source-link" href="https://hamvocke.com/blog/a-guide-to-customizing-your-tmux-conf/" target="_blank">hamvocke.com</a>
+    <a class="source-link" href="https://tmuxai.dev/tmux-prefix/" target="_blank">tmuxai.dev</a>
+  </div>
+
+  <!-- Navigation -->
+  <h3>2 — Pane Navigation: smart-splits.nvim</h3>
+  <div class="callout info">
+    <span class="icon">🚀</span>
+    <p><strong>Replace vim-tmux-navigator with <code>smart-splits.nvim</code></strong> — no shell-out on every keypress, includes resize bindings (<code>Alt-h/j/k/l</code>), zero lag.</p>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Plugin</th><th>Navigation</th><th>Resizing</th><th>Performance</th></tr></thead>
+      <tbody>
+        <tr><td>vim-tmux-navigator</td><td><code>Ctrl-h/j/k/l</code></td><td class="cross">✗ No</td><td>Shells out to <code>ps</code> every keypress — lags</td></tr>
+        <tr><td><strong>smart-splits.nvim</strong></td><td><code>Ctrl-h/j/k/l</code></td><td><span class="check">✓</span> <code>Alt-h/j/k/l</code></td><td><span class="check">✓</span> Uses tmux var — no shell-out</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="sources">
+    <a class="source-link" href="https://github.com/mrjones2014/smart-splits.nvim" target="_blank">smart-splits.nvim</a>
+    <a class="source-link" href="https://medium.com/@karpov-kir/nvim-tmux-smart-navigation-and-resizing-on-macos-6bcb3c1d0e02" target="_blank">medium.com</a>
+    <a class="source-link" href="https://brianschiller.com/blog/2024/07/17/neovim-smart-splits-on-macos/" target="_blank">brianschiller.com</a>
+  </div>
+
+  <!-- Claude Code popup -->
+  <h3>3 — Claude Code Popup Pattern</h3>
+  <pre>bind C-c display-popup -d "#{pane_current_path}" -xC -yC -w 80% -h 80% -E \
+  "tmux new-session -A -s claude 'claude'"</pre>
+  <p style="color:var(--muted); font-size:13px;"><code>Prefix + Ctrl-c</code> → popup opens → dismiss → session persists in background.</p>
+  <div class="sources">
+    <a class="source-link" href="https://www.devas.life/how-to-run-claude-code-in-a-tmux-popup-window-with-persistent-sessions/" target="_blank">devas.life</a>
+    <a class="source-link" href="https://hboon.com/using-tmux-with-claude-code/" target="_blank">hboon.com</a>
+  </div>
+
+  <!-- Escape time -->
+  <h3>4 — Escape Delay Fix (zsh-vi-mode + tmux)</h3>
+  <div class="grid-2">
+    <div>
+      <p style="color:var(--muted); font-size:13px)">Three layers stack escape delay: tmux → Zsh → Neovim.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Setting</th><th>File</th><th>Value</th></tr></thead>
+          <tbody>
+            <tr><td><code>escape-time</code></td><td><code>~/.tmux.conf</code></td><td><code>0</code></td></tr>
+            <tr><td><code>KEYTIMEOUT</code></td><td><code>~/.zshrc</code></td><td><code>1</code> (=10ms)</td></tr>
+            <tr><td><code>ttimeoutlen</code></td><td>Neovim</td><td><code>5–10</code>ms</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <pre style="margin:0;">set -sg escape-time 0
+
+# ~/.zshrc
+export KEYTIMEOUT=1
+ZVM_READKEY_ENGINE=$ZVM_READKEY_ENGINE_NEX
+# Fix fzf Ctrl-R conflict
+zvm_after_init_commands+=(
+  '[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh'
+)</pre>
+  </div>
+  <div class="sources">
+    <a class="source-link" href="https://www.johnhawthorn.com/2012/09/vi-escape-delays/" target="_blank">johnhawthorn.com</a>
+    <a class="source-link" href="https://devedge.github.io/2025/05/09/eliminating-esc-delays-in-tmux-vim-and-zsh/" target="_blank">devedge.github.io</a>
+    <a class="source-link" href="https://github.com/jeffreytse/zsh-vi-mode" target="_blank">jeffreytse/zsh-vi-mode</a>
+  </div>
+
+  <!-- Popular dotfiles -->
+  <h3>5 — Popular Dotfiles Using This Stack</h3>
+  <div class="cards">
+    <div class="card">
+      <div class="card-title">joshukraine/dotfiles <span class="badge rec">macOS</span></div>
+      <p>Neovim (LazyVim), Zsh, Ghostty, tmux. GNU Stow, Starship, claude-code.nvim. Comprehensive setup.</p>
+      <div class="sources"><a class="source-link" href="https://github.com/joshukraine/dotfiles" target="_blank">github.com/joshukraine/dotfiles</a></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Gentleman.Dots <span class="badge new">Homebrew install</span></div>
+      <p>LazyVim + Ghostty + tmux + Zsh. AI integration included. Installable via Homebrew.</p>
+      <div class="sources"><a class="source-link" href="https://github.com/Gentleman-Programming/Gentleman.Dots" target="_blank">github.com/Gentleman-Programming</a></div>
+    </div>
+    <div class="card">
+      <div class="card-title">phansch/dotfiles <span class="badge rec">CI-tested</span></div>
+      <p>Ghostty + tmux + Neovim (LazyVim) + Zsh. Tested weekly on CI. Minimalist approach.</p>
+      <div class="sources"><a class="source-link" href="https://github.com/phansch/dotfiles" target="_blank">github.com/phansch/dotfiles</a></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 2: ALTERNATIVES
+═══════════════════════════════════════════════ -->
+<section class="section" id="alternatives">
+  <div class="section-header">
+    <div class="section-icon" style="background:#1e1040;">🔀</div>
+    <div>
+      <h2>Alternative Stacks</h2>
+      <p>Evaluated against your current setup across 7 dimensions</p>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Stack</th>
+          <th>Performance</th>
+          <th>macOS Native</th>
+          <th>Beginner</th>
+          <th>AI Integration</th>
+          <th>Keybinding Style</th>
+          <th>Verdict</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Ghostty + tmux</strong> <span class="badge current">Current</span></td>
+          <td><span class="check">Fastest</span></td>
+          <td><span class="check">Best</span></td>
+          <td>Medium</td>
+          <td>Claude Code</td>
+          <td>Prefix-key</td>
+          <td><span class="check">✓ Keep</span></td>
+        </tr>
+        <tr>
+          <td><strong>WezTerm</strong></td>
+          <td>Good (heavier)</td>
+          <td>Cross-platform</td>
+          <td>Medium</td>
+          <td>None built-in</td>
+          <td>Custom Lua</td>
+          <td>If you need no tmux</td>
+        </tr>
+        <tr>
+          <td><strong>Ghostty + Zellij</strong></td>
+          <td><span class="check">Fastest</span></td>
+          <td><span class="check">Best</span></td>
+          <td><span class="check">Best</span></td>
+          <td>None built-in</td>
+          <td>Modal (like Vim)</td>
+          <td>Beginner-friendly alt</td>
+        </tr>
+        <tr>
+          <td><strong>Kitty + tmux</strong></td>
+          <td>Excellent</td>
+          <td>Less native</td>
+          <td>Medium</td>
+          <td>None built-in</td>
+          <td>Prefix-key</td>
+          <td>Max scriptability</td>
+        </tr>
+        <tr>
+          <td><strong>Alacritty + tmux</strong></td>
+          <td>Excellent</td>
+          <td>Minimal</td>
+          <td>Medium-Low</td>
+          <td>None built-in</td>
+          <td>Prefix-key</td>
+          <td>Windows support</td>
+        </tr>
+        <tr>
+          <td><strong>Warp</strong></td>
+          <td>Good</td>
+          <td>Polished/SaaS</td>
+          <td><span class="check">High</span></td>
+          <td><span class="check">Built-in AI</span></td>
+          <td>Modern</td>
+          <td><span class="warn-icon">⚠</span> SaaS, $15/mo</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Decision Matrix</h3>
+  <div class="decision-grid">
+    <div class="decision-card">
+      <div class="if">If you want...</div>
+      <div class="choose current">Best macOS native + performance</div>
+      <div class="note">→ Ghostty + tmux (current stack) ✓</div>
+    </div>
+    <div class="decision-card">
+      <div class="if">If you want...</div>
+      <div class="choose">Eliminate tmux entirely</div>
+      <div class="note">→ WezTerm with built-in multiplexer</div>
+    </div>
+    <div class="decision-card">
+      <div class="if">If you want...</div>
+      <div class="choose">Easier multiplexer learning curve</div>
+      <div class="note">→ Ghostty + Zellij (modal, discoverable)</div>
+    </div>
+    <div class="decision-card">
+      <div class="if">If you want...</div>
+      <div class="choose">Maximum scriptability</div>
+      <div class="note">→ Kitty terminal (kittens ecosystem)</div>
+    </div>
+    <div class="decision-card">
+      <div class="if">If you want...</div>
+      <div class="choose">Windows support + proven stack</div>
+      <div class="note">→ Alacritty + tmux</div>
+    </div>
+    <div class="decision-card">
+      <div class="if">If you want...</div>
+      <div class="choose">AI-first, GUI-friendly</div>
+      <div class="note">→ Warp (trade-off: SaaS, no Vim-centric)</div>
+    </div>
+  </div>
+
+  <div class="sources">
+    <a class="source-link" href="https://scopir.com/posts/ghostty-vs-wezterm-2026/" target="_blank">Ghostty vs WezTerm 2026</a>
+    <a class="source-link" href="https://calmops.com/tools/modern-terminal-emulators-2026-ghostty-wezterm-alacritty/" target="_blank">Modern Terminal Emulators 2026</a>
+    <a class="source-link" href="https://dasroot.net/posts/2026/02/terminal-multiplexers-tmux-vs-zellij-comparison/" target="_blank">Zellij vs tmux</a>
+    <a class="source-link" href="https://itsfoss.com/comparison/ghostty-vs-kitty/" target="_blank">Kitty vs Ghostty</a>
+    <a class="source-link" href="https://thenewstack.io/how-warp-went-from-terminal-to-agentic-development-environment/" target="_blank">Warp Agentic</a>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 3: UNIVERSAL VIM
+═══════════════════════════════════════════════ -->
+<section class="section" id="universal-vim">
+  <div class="section-header">
+    <div class="section-icon" style="background:#0d2818;">🔤</div>
+    <div>
+      <h2>Universal Vim Keybindings</h2>
+      <p>These work identically in Vim, Neovim, LazyVim, VSCodeVim, IdeaVim, Zed, XCode — safe to memorize forever</p>
+    </div>
+  </div>
+
+  <div class="callout tip">
+    <span class="icon">🧠</span>
+    <p><strong>The Grammar Rule:</strong> Vim uses <strong>Verb + Noun</strong> (operator + motion). Learn 4 operators + 4 motions = 16 commands. Each new piece is a multiplier, not a separate shortcut.</p>
+  </div>
+
+  <div class="sources" style="margin-bottom:24px;">
+    <a class="source-link" href="https://learnvim.irian.to/basics/vim_grammar/" target="_blank">Vim Grammar</a>
+    <a class="source-link" href="https://www.ssp.sh/brain/vim-language-and-motions/" target="_blank">The Vim Language</a>
+    <a class="source-link" href="https://www.freecodecamp.org/news/vim-language-and-motions-explained/" target="_blank">freeCodeCamp Vim Explained</a>
+  </div>
+
+  <div class="tab-group">
+    <div class="tab-buttons">
+      <button class="tab-btn active" onclick="showTab('motions')">Motions</button>
+      <button class="tab-btn" onclick="showTab('operators')">Operators</button>
+      <button class="tab-btn" onclick="showTab('textobjects')">Text Objects</button>
+      <button class="tab-btn" onclick="showTab('search')">Search & More</button>
+      <button class="tab-btn" onclick="showTab('compat')">Compatibility</button>
+    </div>
+
+    <div id="motions" class="tab-panel active">
+      <div class="binding-grid">
+        <div class="binding-section">
+          <h4>Basic Movement</h4>
+          <div class="binding-row"><span class="key">h j k l</span><span class="desc">←↓↑→</span></div>
+          <div class="binding-row"><span class="key">w / b</span><span class="desc">word forward / back</span></div>
+          <div class="binding-row"><span class="key">e / ge</span><span class="desc">word end / back-end</span></div>
+          <div class="binding-row"><span class="key">0 / $</span><span class="desc">line start / end</span></div>
+          <div class="binding-row"><span class="key">^</span><span class="desc">first non-blank</span></div>
+          <div class="binding-row"><span class="key">gg / G</span><span class="desc">file start / end</span></div>
+          <div class="binding-row"><span class="key">Ctrl-d / Ctrl-u</span><span class="desc">half-page down / up</span></div>
+          <div class="binding-row"><span class="key">%</span><span class="desc">matching bracket</span></div>
+          <div class="binding-row"><span class="key">H M L</span><span class="desc">screen top/mid/bot</span></div>
+        </div>
+        <div class="binding-section">
+          <h4>Find Motions (High ROI)</h4>
+          <div class="binding-row"><span class="key">f{char}</span><span class="desc">jump TO next char</span></div>
+          <div class="binding-row"><span class="key">F{char}</span><span class="desc">jump TO prev char</span></div>
+          <div class="binding-row"><span class="key">t{char}</span><span class="desc">jump BEFORE next char</span></div>
+          <div class="binding-row"><span class="key">T{char}</span><span class="desc">jump BEFORE prev char</span></div>
+          <div class="binding-row"><span class="key">;</span><span class="desc">repeat f/F/t/T forward</span></div>
+          <div class="binding-row"><span class="key">,</span><span class="desc">repeat f/F/t/T backward</span></div>
+        </div>
+        <div class="binding-section">
+          <h4>Dot & Undo (Power Moves)</h4>
+          <div class="binding-row"><span class="key">.</span><span class="desc">repeat last change</span></div>
+          <div class="binding-row"><span class="key">u</span><span class="desc">undo</span></div>
+          <div class="binding-row"><span class="key">Ctrl-r</span><span class="desc">redo</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="operators" class="tab-panel">
+      <div class="binding-grid">
+        <div class="binding-section">
+          <h4>Operators (Verbs)</h4>
+          <div class="binding-row"><span class="key">d</span><span class="desc">delete</span></div>
+          <div class="binding-row"><span class="key">c</span><span class="desc">change (delete + insert)</span></div>
+          <div class="binding-row"><span class="key">y</span><span class="desc">yank (copy)</span></div>
+          <div class="binding-row"><span class="key">&gt; / &lt;</span><span class="desc">indent right / left</span></div>
+          <div class="binding-row"><span class="key">gu / gU</span><span class="desc">lowercase / uppercase</span></div>
+          <div class="binding-row"><span class="key">g~</span><span class="desc">toggle case</span></div>
+          <div class="binding-row"><span class="key">=</span><span class="desc">auto-indent</span></div>
+        </div>
+        <div class="binding-section">
+          <h4>Operator + Line (double)</h4>
+          <div class="binding-row"><span class="key">dd</span><span class="desc">delete whole line</span></div>
+          <div class="binding-row"><span class="key">cc</span><span class="desc">change whole line</span></div>
+          <div class="binding-row"><span class="key">yy</span><span class="desc">yank whole line</span></div>
+          <div class="binding-row"><span class="key">&gt;&gt;</span><span class="desc">indent line right</span></div>
+          <div class="binding-row"><span class="key">&lt;&lt;</span><span class="desc">indent line left</span></div>
+        </div>
+        <div class="binding-section">
+          <h4>Insert Mode Entry</h4>
+          <div class="binding-row"><span class="key">i / a</span><span class="desc">before / after cursor</span></div>
+          <div class="binding-row"><span class="key">I / A</span><span class="desc">line start / end</span></div>
+          <div class="binding-row"><span class="key">o / O</span><span class="desc">new line below / above</span></div>
+          <div class="binding-row"><span class="key">s / S</span><span class="desc">char / line substitute</span></div>
+          <div class="binding-row"><span class="key">Esc</span><span class="desc">back to Normal mode</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="textobjects" class="tab-panel">
+      <div class="callout info">
+        <span class="icon">💡</span>
+        <p>Text objects = <strong>operator</strong> + <code>i</code>(inner) or <code>a</code>(around) + <strong>object</strong>. They are the most powerful feature to learn after basic motions.</p>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Object</th><th>Inner (i)</th><th>Around (a)</th><th>Example use</th></tr></thead>
+          <tbody>
+            <tr><td><code>w</code> — word</td><td><code>ciw</code></td><td><code>daw</code></td><td>Change/delete word</td></tr>
+            <tr><td><code>"</code> — double quotes</td><td><code>ci"</code></td><td><code>da"</code></td><td>Change inside quotes</td></tr>
+            <tr><td><code>'</code> — single quotes</td><td><code>ci'</code></td><td><code>da'</code></td><td>Change inside quotes</td></tr>
+            <tr><td><code>(</code> or <code>)</code> — parens</td><td><code>ci(</code></td><td><code>da)</code></td><td>Change inside parens</td></tr>
+            <tr><td><code>{</code> or <code>}</code> — braces</td><td><code>ci{</code></td><td><code>da}</code></td><td>Change inside block</td></tr>
+            <tr><td><code>[</code> or <code>]</code> — brackets</td><td><code>ci[</code></td><td><code>da]</code></td><td>Change inside array</td></tr>
+            <tr><td><code>p</code> — paragraph</td><td><code>cip</code></td><td><code>dap</code></td><td>Change/delete paragraph</td></tr>
+            <tr><td><code>t</code> — HTML tag</td><td><code>cit</code></td><td><code>dat</code></td><td>Change tag content</td></tr>
+            <tr><td><code>s</code> — sentence</td><td><code>cis</code></td><td><code>das</code></td><td>Change sentence</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="search" class="tab-panel">
+      <div class="binding-grid">
+        <div class="binding-section">
+          <h4>Search</h4>
+          <div class="binding-row"><span class="key">/pattern</span><span class="desc">search forward</span></div>
+          <div class="binding-row"><span class="key">?pattern</span><span class="desc">search backward</span></div>
+          <div class="binding-row"><span class="key">n / N</span><span class="desc">next / prev match</span></div>
+          <div class="binding-row"><span class="key">*</span><span class="desc">search word under cursor ↓</span></div>
+          <div class="binding-row"><span class="key">#</span><span class="desc">search word under cursor ↑</span></div>
+        </div>
+        <div class="binding-section">
+          <h4>Marks</h4>
+          <div class="binding-row"><span class="key">m{a-z}</span><span class="desc">set mark</span></div>
+          <div class="binding-row"><span class="key">`{a-z}</span><span class="desc">jump to exact position</span></div>
+          <div class="binding-row"><span class="key">'{a-z}</span><span class="desc">jump to line</span></div>
+          <div class="binding-row"><span class="key">``</span><span class="desc">jump back (last position)</span></div>
+        </div>
+        <div class="binding-section">
+          <h4>Registers</h4>
+          <div class="binding-row"><span class="key">"{a-z}y</span><span class="desc">yank into register</span></div>
+          <div class="binding-row"><span class="key">"{a-z}p</span><span class="desc">paste from register</span></div>
+          <div class="binding-row"><span class="key">"0p</span><span class="desc">paste last yank</span></div>
+          <div class="binding-row"><span class="key">"+y / "+p</span><span class="desc">system clipboard</span></div>
+        </div>
+        <div class="binding-section">
+          <h4>Macros</h4>
+          <div class="binding-row"><span class="key">q{a-z}</span><span class="desc">start recording</span></div>
+          <div class="binding-row"><span class="key">q</span><span class="desc">stop recording</span></div>
+          <div class="binding-row"><span class="key">@{a-z}</span><span class="desc">play macro</span></div>
+          <div class="binding-row"><span class="key">@@</span><span class="desc">replay last macro</span></div>
+          <div class="binding-row"><span class="key">{n}@{a-z}</span><span class="desc">repeat n times</span></div>
+        </div>
+        <div class="binding-section">
+          <h4>Visual Mode</h4>
+          <div class="binding-row"><span class="key">v</span><span class="desc">char selection</span></div>
+          <div class="binding-row"><span class="key">V</span><span class="desc">line selection</span></div>
+          <div class="binding-row"><span class="key">Ctrl-v</span><span class="desc">block selection</span></div>
+          <div class="binding-row"><span class="key">gv</span><span class="desc">reselect last</span></div>
+          <div class="binding-row"><span class="key">o</span><span class="desc">toggle selection end</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="compat" class="tab-panel">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Feature</th><th>Vim</th><th>LazyVim</th><th>VSCodeVim</th><th>IdeaVim</th><th>Zed</th><th>XCode</th></tr></thead>
+          <tbody>
+            <tr><td>hjkl + motions</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td></tr>
+            <tr><td>f/t/F/T find</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td></tr>
+            <tr><td>Text objects (ci/di/yi)</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td></tr>
+            <tr><td>Operators d/c/y/&gt;/&lt;</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td></tr>
+            <tr><td>Visual mode v/V/Ctrl-v</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td></tr>
+            <tr><td>Search //?/n/N/*/#</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td></tr>
+            <tr><td>Dot repeat (.)</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td></tr>
+            <tr><td>Marks m/`/'</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="warn-icon">⚠</td></tr>
+            <tr><td>Registers "ay/"ap</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="warn-icon">⚠</td></tr>
+            <tr><td>Macros q/@</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="cross">✗</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>NOT Universal (editor-specific)</h3>
+      <div class="callout warn">
+        <span class="icon">⚠️</span>
+        <p>These vary by editor: <code>:commands</code> (Ex commands) · <code>Ctrl-w</code> splits · buffer/tab navigation · plugin mappings (<code>gcc</code>, <code>cs"'</code>) · Vimscript/Lua config</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Beginner 30 list -->
+  <h3>The 30-Command Beginner Safe List</h3>
+  <pre>MOVEMENT:   hjkl  w/b  e  0/$  gg/G  Ctrl-d/u  f{c}/t{c}  ;/,  %
+EDITING:    i/a/I/A/o/O  Esc  dd/yy/p  u/Ctrl-r  .
+TEXT OBJS:  ciw  ci"  ci(  diw/di"/di(  yiw  daw/da"
+SEARCH:     /pattern  n/N  *
+POWER:      q{a-z}...q  @{a-z}  v/V/Ctrl-v</pre>
+
+  <h3>Learning Resources</h3>
+  <ul class="priority-list">
+    <li>
+      <div class="priority-num">1</div>
+      <div><a href="#">vimtutor</a> — Run in terminal. Built-in, free, 30 min/day builds muscle memory.
+        <div class="item-desc">Just type <code>vimtutor</code> in your terminal.</div>
+      </div>
+    </li>
+    <li>
+      <div class="priority-num">2</div>
+      <div><a href="https://theprimeagen.github.io/vim-fundamentals/" target="_blank">ThePrimeagen's Vim Fundamentals</a> — Best structured course.
+        <div class="item-desc">Frontend Masters. "Best Vim course" by community consensus.</div>
+      </div>
+    </li>
+    <li>
+      <div class="priority-num">3</div>
+      <div><a href="https://github.com/ThePrimeagen/vim-be-good" target="_blank">vim-be-good</a> — Neovim plugin, game-based motion practice.
+        <div class="item-desc">Practice motions without leaving Neovim.</div>
+      </div>
+    </li>
+    <li>
+      <div class="priority-num">4</div>
+      <div><a href="https://vim-adventures.com/" target="_blank">Vim Adventures</a> — Gamified browser learning.
+        <div class="item-desc">$25, first level free. Great for visual learners.</div>
+      </div>
+    </li>
+    <li>
+      <div class="priority-num">5</div>
+      <div><a href="https://github.com/iggredible/Learn-Vim" target="_blank">Learn-Vim (GitHub)</a> — Comprehensive free guide.
+        <div class="item-desc">Text-object and operator deep-dives.</div>
+      </div>
+    </li>
+  </ul>
+  <div class="sources">
+    <a class="source-link" href="https://github.com/erikw/vim-keybindings-everywhere-the-ultimate-list" target="_blank">Vim Keybindings Everywhere</a>
+    <a class="source-link" href="https://www.classcentral.com/report/best-vim-courses/" target="_blank">Class Central Vim Courses</a>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 4: AI-NATIVE
+═══════════════════════════════════════════════ -->
+<section class="section" id="ai-native">
+  <div class="section-header">
+    <div class="section-icon" style="background:#2a1f00;">🤖</div>
+    <div>
+      <h2>AI-Native Workflow</h2>
+      <p>What prominent AI engineers use — and how to optimize your stack for Gen AI roles</p>
+    </div>
+  </div>
+
+  <div class="callout tip">
+    <span class="icon">🎯</span>
+    <p><strong>Your stack is near-optimal for AI-native work in 2026.</strong> The terminal-first approach is the dominant professional pattern for agentic engineering — orchestrating AI rather than writing code directly.</p>
+  </div>
+
+  <!-- What engineers use -->
+  <h3>What Prominent AI Engineers Actually Use</h3>
+  <div class="cards">
+    <div class="card">
+      <div class="card-title">Andrej Karpathy</div>
+      <p>Coined "vibe coding" (Feb 2025, 4.5M views). Setup: <strong>Cursor Composer + Claude Sonnet + SuperWhisper</strong>. By 2026: evolved to "agentic engineering" — orchestrating autonomous AI agents.</p>
+      <blockquote style="border-left:2px solid var(--border); padding-left:12px; color:var(--muted); font-style:italic; font-size:12px; margin-top:8px;">"You are not writing the code directly 99% of the time."</blockquote>
+      <div class="sources">
+        <a class="source-link" href="https://www.latent.space/p/s3" target="_blank">Latent Space interview</a>
+        <a class="source-link" href="https://www.abhs.in/blog/andrej-karpathy-autoresearch-autonomous-ai-ml-experiments-2026" target="_blank">AutoResearch 2026</a>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Anthropic Engineers</div>
+      <p><strong>Boris Cherny</strong> (head of Claude Code): 100% of his code is AI-written. Company-wide: AI writes 70-90%. Claude Code writes ~90% of its own codebase.</p>
+      <div class="sources">
+        <a class="source-link" href="https://fortune.com/2026/01/29/100-percent-of-code-at-anthropic-and-openai-is-now-ai-written-boris-cherny-roon/" target="_blank">Fortune Jan 2026</a>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Industry Pattern (2026)</div>
+      <p>~50% of devs at AI/ML startups use <strong>Vim or Helix</strong>. Most productive setup: <strong>IDE agent for daily work + terminal agent for hard problems</strong>. Most use 2-3 tools together.</p>
+      <div class="sources">
+        <a class="source-link" href="https://tduyng.com/blog/rise-of-terminal/" target="_blank">Rise of Terminal Tools</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- tmux layouts -->
+  <h3>tmux Session Layouts for AI Work</h3>
+  <div class="grid-2">
+    <div>
+      <p style="color:var(--muted); font-size:13px; margin-bottom:8px;"><strong>Pattern 1 — Solo AI Development</strong></p>
+      <pre>Window 1: "code"
+  Neovim (60%) | Claude Code (40%)
+Window 2: "run"
+  Server/model | Logs (tail -f)
+Window 3: "eval"
+  Eval pipeline | Results viewer
+Window 4: "git"
+  Git ops | PR reviews</pre>
+    </div>
+    <div>
+      <p style="color:var(--muted); font-size:13px; margin-bottom:8px;"><strong>Pattern 2 — Multi-Agent Orchestration</strong></p>
+      <pre>Window 1: "agents"
+  Lead | Worker1 | Worker2 | Worker3
+Window 2: "code"
+  Neovim (full, claudecode.nvim)
+Window 3: "monitor"
+  htop | nvidia-smi | Logs</pre>
+    </div>
+  </div>
+  <div class="sources">
+    <a class="source-link" href="https://github.com/njbrake/agent-of-empires" target="_blank">Agent of Empires (aoe)</a>
+    <a class="source-link" href="https://github.com/Dicklesworthstone/ntm" target="_blank">NTM multi-agent TUI</a>
+    <a class="source-link" href="https://github.com/nielsgroen/claude-tmux" target="_blank">claude-tmux</a>
+  </div>
+
+  <!-- Recommended enhancements -->
+  <h3>Recommended Enhancements (Priority Order)</h3>
+  <ul class="priority-list">
+    <li>
+      <div class="priority-num">1</div>
+      <div><a href="https://github.com/coder/claudecode.nvim" target="_blank">claudecode.nvim</a>
+        <div class="item-desc">WebSocket MCP integration — same protocol as VS Code extension. Claude Code auto-detects Neovim.</div>
+      </div>
+    </li>
+    <li>
+      <div class="priority-num">2</div>
+      <div><a href="https://github.com/yetone/avante.nvim" target="_blank">avante.nvim</a>
+        <div class="item-desc">Cursor-like experience in Neovim. Multi-model: Claude, GPT, Gemini, Ollama. Agentic mode.</div>
+      </div>
+    </li>
+    <li>
+      <div class="priority-num">3</div>
+      <div>Configure file hot-reload for Claude Code changes
+        <div class="item-desc"><code>vim.opt.autoread = true</code> + <code>checktime</code> autocmd on FocusGained/BufEnter.</div>
+      </div>
+    </li>
+    <li>
+      <div class="priority-num">4</div>
+      <div><a href="https://github.com/sindrets/diffview.nvim" target="_blank">diffview.nvim</a> with auto-refresh
+        <div class="item-desc">Live diff view — see Claude Code's changes appear as they happen.</div>
+      </div>
+    </li>
+    <li>
+      <div class="priority-num">5</div>
+      <div>Add path-yanking keybindings
+        <div class="item-desc"><code>&lt;leader&gt;yr</code> (relative path) and <code>&lt;leader&gt;ya</code> (absolute) for quick code reference in Claude chat.</div>
+      </div>
+    </li>
+    <li>
+      <div class="priority-num">6</div>
+      <div><a href="https://github.com/SUSTech-data/neopyter" target="_blank">Neopyter</a>
+        <div class="item-desc">Edit in Neovim, run in JupyterLab. Bridge for ML experimentation workflows.</div>
+      </div>
+    </li>
+    <li>
+      <div class="priority-num">7</div>
+      <div><a href="https://aider.chat" target="_blank">Aider</a> as complement
+        <div class="item-desc">Model-agnostic, git-first. 4.2x fewer tokens than Claude Code. Use for routine changes; Claude Code for complex tasks.</div>
+      </div>
+    </li>
+  </ul>
+
+  <!-- Alternatives through AI lens -->
+  <h3>Alternatives Through AI-Native Lens</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Tool</th><th>AI Strengths</th><th>AI Weaknesses</th><th>Verdict</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Cursor IDE</strong></td><td>Best tab completions, codebase indexing, Background Agents</td><td>Electron (800MB RAM), $20/mo, no terminal orchestration</td><td>Karpathy's choice for vibe coding</td></tr>
+        <tr><td><strong>Zed Editor</strong></td><td>ACP integrates Claude Code natively, 200ms start, real-time collab</td><td>Less mature AI features</td><td><span class="check">Best companion</span> to CLI agents</td></tr>
+        <tr><td><strong>Windsurf</strong></td><td>Cascade multi-file reasoning, $15/mo</td><td>Power users hit ceiling quickly</td><td>Good for onboarding</td></tr>
+        <tr><td><strong>VSCode + Continue</strong></td><td>BYO model (Claude/GPT/local), free, open-source</td><td>Less polished edits</td><td>Best open-source in-editor</td></tr>
+        <tr><td><strong>Aider</strong></td><td>Model-agnostic, git-first, 52.7% SWE-bench</td><td>Lower first-pass success than Claude Code</td><td>Complement for routine changes</td></tr>
+        <tr><td><strong>JupyterLab</strong></td><td>%%ai magic, interactive LLM experimentation</td><td>Poor version control, not for production code</td><td>Essential for ML exploration phases</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="sources">
+    <a class="source-link" href="https://cursor.com/" target="_blank">cursor.com</a>
+    <a class="source-link" href="https://www.builder.io/blog/zed-ai-2026" target="_blank">Zed AI 2026</a>
+    <a class="source-link" href="https://zenvanriel.com/ai-engineer-blog/aider-vs-claude-code/" target="_blank">Aider vs Claude Code</a>
+    <a class="source-link" href="https://opencode.ai/" target="_blank">opencode.ai</a>
+    <a class="source-link" href="https://github.com/jupyterlab/jupyter-ai" target="_blank">jupyter-ai</a>
+    <a class="source-link" href="https://xata.io/blog/configuring-neovim-coding-agents" target="_blank">xata.io Neovim config</a>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 5: QUICK REFERENCE
+═══════════════════════════════════════════════ -->
+<section class="section" id="quick-ref">
+  <div class="section-header">
+    <div class="section-icon" style="background:#1e1040;">⚡</div>
+    <div>
+      <h2>Quick Reference</h2>
+      <p>The complete recommended tmux.conf and full keybinding map</p>
+    </div>
+  </div>
+
+  <h3>Complete Recommended tmux.conf</h3>
+  <pre># ── PREFIX ──────────────────────────────────────────────
+unbind C-b
+set -g prefix C-Space
+bind C-Space send-prefix
+
+# ── PERFORMANCE ──────────────────────────────────────────
+set -sg escape-time 0
+set -g focus-events on
+set -g history-limit 50000
+
+# ── GHOSTTY INTEGRATION ──────────────────────────────────
+set -s extended-keys on
+set -s extended-keys-format csi-u
+set -as terminal-features 'xterm-ghostty:extkeys'
+set -g allow-passthrough on
+set -g default-terminal "tmux-256color"
+set -ag terminal-overrides ",xterm-ghostty:RGB"
+
+# ── INDEXING ─────────────────────────────────────────────
+set -g base-index 1
+setw -g pane-base-index 1
+
+# ── MOUSE ────────────────────────────────────────────────
+set -g mouse on
+
+# ── SPLITS ───────────────────────────────────────────────
+bind | split-window -h -c "#{pane_current_path}"
+bind - split-window -v -c "#{pane_current_path}"
+
+# ── VI COPY MODE ─────────────────────────────────────────
+setw -g mode-keys vi
+bind -T copy-mode-vi v send-keys -X begin-selection
+bind -T copy-mode-vi V send-keys -X select-line
+bind -T copy-mode-vi C-v send-keys -X rectangle-toggle
+bind -T copy-mode-vi y send-keys -X copy-pipe-and-cancel "pbcopy"
+bind -T copy-mode-vi Enter send-keys -X copy-pipe-and-cancel "pbcopy"
+bind -T copy-mode-vi MouseDragEnd1Pane send-keys -X copy-pipe-and-cancel "pbcopy"
+
+# ── CLAUDE CODE POPUP ────────────────────────────────────
+bind C-c display-popup -d "#{pane_current_path}" -xC -yC -w 80% -h 80% -E \
+  "tmux new-session -A -s claude 'claude'"
+
+# ── RELOAD ───────────────────────────────────────────────
+bind r source-file ~/.tmux.conf \; display "Reloaded!"</pre>
+
+  <h3>Full Keybinding Map</h3>
+  <div class="binding-grid">
+    <div class="binding-section">
+      <h4>tmux — Core</h4>
+      <div class="binding-row"><span class="key">Ctrl-Space</span><span class="desc">Prefix</span></div>
+      <div class="binding-row"><span class="key">Prefix + |</span><span class="desc">split vertical</span></div>
+      <div class="binding-row"><span class="key">Prefix + -</span><span class="desc">split horizontal</span></div>
+      <div class="binding-row"><span class="key">Prefix + r</span><span class="desc">reload config</span></div>
+      <div class="binding-row"><span class="key">Prefix + z</span><span class="desc">zoom pane</span></div>
+      <div class="binding-row"><span class="key">Prefix + Ctrl-c</span><span class="desc">Claude Code popup</span></div>
+    </div>
+    <div class="binding-section">
+      <h4>tmux — Navigation (smart-splits)</h4>
+      <div class="binding-row"><span class="key">Ctrl-h/j/k/l</span><span class="desc">navigate panes ↔ Neovim splits</span></div>
+      <div class="binding-row"><span class="key">Alt-h/j/k/l</span><span class="desc">resize panes ↔ Neovim splits</span></div>
+    </div>
+    <div class="binding-section">
+      <h4>tmux — Copy Mode</h4>
+      <div class="binding-row"><span class="key">Prefix + [</span><span class="desc">enter copy mode</span></div>
+      <div class="binding-row"><span class="key">v</span><span class="desc">begin selection</span></div>
+      <div class="binding-row"><span class="key">V</span><span class="desc">select line</span></div>
+      <div class="binding-row"><span class="key">Ctrl-v</span><span class="desc">rectangle selection</span></div>
+      <div class="binding-row"><span class="key">y</span><span class="desc">yank → pbcopy</span></div>
+    </div>
+    <div class="binding-section">
+      <h4>Zsh / zsh-vi-mode</h4>
+      <div class="binding-row"><span class="key">jk</span><span class="desc">Esc (normal mode)</span></div>
+      <div class="binding-row"><span class="key">Ctrl-r</span><span class="desc">fzf history search</span></div>
+      <div class="binding-row"><span class="key">vi</span><span class="desc">alias → nvim</span></div>
+    </div>
+    <div class="binding-section">
+      <h4>Neovim (LazyVim)</h4>
+      <div class="binding-row"><span class="key">Space</span><span class="desc">Leader key</span></div>
+      <div class="binding-row"><span class="key">Ctrl-h/j/k/l</span><span class="desc">navigate splits (seamless)</span></div>
+      <div class="binding-row"><span class="key">Alt-h/j/k/l</span><span class="desc">resize splits (seamless)</span></div>
+      <div class="binding-row"><span class="key">&lt;leader&gt;yr</span><span class="desc">yank relative path</span></div>
+      <div class="binding-row"><span class="key">&lt;leader&gt;ya</span><span class="desc">yank absolute path</span></div>
+    </div>
+    <div class="binding-section">
+      <h4>Claude Code CLI</h4>
+      <div class="binding-row"><span class="key">/vim</span><span class="desc">enable vim mode</span></div>
+      <div class="binding-row"><span class="key">/keybindings</span><span class="desc">edit keybindings</span></div>
+      <div class="binding-row"><span class="key">/doctor</span><span class="desc">diagnose issues</span></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  Research compiled from 3 specialized agents · March 2026 ·
+  <a href="stack-configs.md" style="color:var(--blue); text-decoration:none;">stack-configs.md</a> ·
+  <a href="alternatives.md" style="color:var(--blue); text-decoration:none;">alternatives.md</a> ·
+  <a href="ai-native.md" style="color:var(--blue); text-decoration:none;">ai-native.md</a>
+</footer>
+
+<script>
+  // Theme toggle — canonical pattern
+  (function() {
+    const root = document.documentElement;
+    const btn  = document.getElementById('theme-toggle');
+    const icon = document.getElementById('theme-icon');
+    const mq   = window.matchMedia('(prefers-color-scheme: dark)');
+
+    function applyTheme(theme) {
+      root.setAttribute('data-theme', theme);
+      icon.textContent = theme === 'dark' ? '🌙' : '☀️';
+      localStorage.setItem('theme', theme);
+    }
+
+    const stored = localStorage.getItem('theme');
+    applyTheme(stored || (mq.matches ? 'dark' : 'light'));
+
+    mq.addEventListener('change', e => {
+      if (!localStorage.getItem('theme')) applyTheme(e.matches ? 'dark' : 'light');
+    });
+
+    btn.addEventListener('click', () => {
+      applyTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+    });
+  })();
+
+  // Tab switching
+  function showTab(id) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    event.target.classList.add('active');
+  }
+
+  // Nav active state on scroll
+  const sections = document.querySelectorAll('.section');
+  const navLinks = document.querySelectorAll('nav a');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navLinks.forEach(a => a.classList.remove('active'));
+        const id = entry.target.id;
+        const link = document.querySelector(`nav a[href="#${id}"]`);
+        if (link) link.classList.add('active');
+      }
+    });
+  }, { threshold: 0.3 });
+
+  sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>
