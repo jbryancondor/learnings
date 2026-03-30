@@ -1,0 +1,1874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SDD Tools Benchmark — 2026</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --bg-card: #161b22;
+      --bg-code: #0d1117;
+      --border: #30363d;
+      --text: #e6edf3;
+      --text-muted: #7d8590;
+      --text-dim: #484f58;
+      --accent: #58a6ff;
+      --accent-2: #3fb950;
+      --accent-3: #d2a8ff;
+      --accent-warn: #d29922;
+      --accent-danger: #f85149;
+      --tag-bg: #1f2937;
+      --sidebar-w: 280px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+      display: flex;
+    }
+
+    /* ── Sidebar ── */
+    #sidebar {
+      width: var(--sidebar-w);
+      min-height: 100vh;
+      background: var(--bg-card);
+      border-right: 1px solid var(--border);
+      position: fixed;
+      top: 0; left: 0;
+      overflow-y: auto;
+      padding: 0 0 40px;
+      z-index: 100;
+    }
+    #sidebar-header {
+      padding: 20px 16px 12px;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: var(--bg-card);
+      z-index: 10;
+    }
+    #sidebar-header h2 {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: .5px;
+      text-transform: uppercase;
+    }
+    #sidebar-header p {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+    #search {
+      width: 100%;
+      margin-top: 10px;
+      padding: 6px 10px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 13px;
+      outline: none;
+    }
+    #search:focus { border-color: var(--accent); }
+    #search::placeholder { color: var(--text-dim); }
+
+    .nav-section { padding: 10px 0 0; }
+    .nav-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      padding: 6px 16px 4px;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 16px;
+      cursor: pointer;
+      border-radius: 0;
+      text-decoration: none;
+      color: var(--text-muted);
+      font-size: 13px;
+      transition: background 0.1s, color 0.1s;
+      border-left: 2px solid transparent;
+    }
+    .nav-item:hover { background: rgba(88,166,255,0.07); color: var(--text); }
+    .nav-item.active { color: var(--accent); border-left-color: var(--accent); background: rgba(88,166,255,0.08); }
+    .nav-stars {
+      margin-left: auto;
+      font-size: 10px;
+      color: var(--text-dim);
+      white-space: nowrap;
+    }
+    .nav-tag {
+      font-size: 10px;
+      padding: 1px 6px;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+    .tag-open { background: rgba(63,185,80,.15); color: var(--accent-2); }
+    .tag-prop { background: rgba(210,169,255,.12); color: var(--accent-3); }
+    .tag-free { background: rgba(88,166,255,.12); color: var(--accent); }
+
+    /* ── Main ── */
+    #main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      min-height: 100vh;
+    }
+
+    /* ── Hero ── */
+    #hero {
+      padding: 48px 48px 32px;
+      border-bottom: 1px solid var(--border);
+    }
+    #hero h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -.5px;
+    }
+    #hero h1 span { color: var(--accent); }
+    #hero p {
+      color: var(--text-muted);
+      margin-top: 8px;
+      font-size: 14px;
+      max-width: 600px;
+    }
+    .hero-meta {
+      display: flex;
+      gap: 24px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+    .hero-stat {
+      display: flex;
+      flex-direction: column;
+    }
+    .hero-stat strong {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .hero-stat span { font-size: 12px; color: var(--text-muted); }
+
+    /* ── Tabs ── */
+    .tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+      padding: 0 48px;
+      background: var(--bg-card);
+    }
+    .tab {
+      padding: 12px 16px;
+      cursor: pointer;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 500;
+      border-bottom: 2px solid transparent;
+      transition: color 0.15s;
+      user-select: none;
+    }
+    .tab:hover { color: var(--text); }
+    .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    /* ── Content ── */
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* ── Comparison Table ── */
+    #tab-compare { overflow-x: auto; }
+    .table-wrap { padding: 32px 48px; }
+    .table-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .table-subtitle { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; }
+    .filter-bar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .filter-btn {
+      padding: 4px 12px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .filter-btn:hover, .filter-btn.on {
+      background: rgba(88,166,255,.12);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    thead th {
+      text-align: left;
+      padding: 8px 12px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      color: var(--text-dim);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+      background: var(--bg-card);
+      position: sticky;
+      top: 0;
+    }
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background 0.1s;
+      cursor: pointer;
+    }
+    tbody tr:hover { background: rgba(88,166,255,0.04); }
+    tbody td { padding: 9px 12px; vertical-align: middle; }
+    .tool-name { font-weight: 600; color: var(--text); }
+    .tool-maker { font-size: 11px; color: var(--text-dim); }
+    .stars-badge {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent-warn);
+    }
+    .sdd-badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 10px;
+      white-space: nowrap;
+    }
+    .sdd-first { background: rgba(88,166,255,.15); color: var(--accent); }
+    .sdd-anchored { background: rgba(63,185,80,.15); color: var(--accent-2); }
+    .sdd-source { background: rgba(210,169,255,.15); color: var(--accent-3); }
+    .sdd-autonomous { background: rgba(248,81,73,.15); color: var(--accent-danger); }
+    .sdd-api { background: rgba(210,153,34,.15); color: var(--accent-warn); }
+    .sdd-bdd { background: rgba(126,155,220,.15); color: #7ea5ff; }
+    .price-free { color: var(--accent-2); font-weight: 600; }
+    .price-paid { color: var(--accent-warn); font-weight: 600; }
+    .lock-none { color: var(--accent-2); }
+    .lock-yes { color: var(--accent-danger); }
+
+    /* ── Tool Cards ── */
+    #tab-tools .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 16px;
+      padding: 32px 48px;
+    }
+    .tool-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+      cursor: pointer;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .tool-card:hover {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(88,166,255,.15);
+    }
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+    .card-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .card-maker {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+    .card-stars {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent-warn);
+      white-space: nowrap;
+    }
+    .card-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+      line-height: 1.5;
+    }
+    .card-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+    .ctag {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
+
+    /* ── Detail Panel ── */
+    #detail-panel {
+      display: none;
+      position: fixed;
+      top: 0; right: 0;
+      width: 600px;
+      height: 100vh;
+      background: var(--bg-card);
+      border-left: 1px solid var(--border);
+      overflow-y: auto;
+      z-index: 200;
+      box-shadow: -8px 0 32px rgba(0,0,0,0.5);
+    }
+    #detail-panel.open { display: block; }
+    #panel-close {
+      position: sticky;
+      top: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 24px;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      z-index: 10;
+    }
+    #panel-close h3 { font-size: 16px; font-weight: 700; }
+    #close-btn {
+      cursor: pointer;
+      color: var(--text-muted);
+      font-size: 20px;
+      line-height: 1;
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+    #close-btn:hover { background: rgba(255,255,255,.08); color: var(--text); }
+    #panel-body { padding: 24px; }
+
+    .detail-kv {
+      display: grid;
+      grid-template-columns: 130px 1fr;
+      gap: 6px 12px;
+      font-size: 13px;
+      margin-bottom: 20px;
+      padding: 14px;
+      background: var(--bg);
+      border-radius: 6px;
+      border: 1px solid var(--border);
+    }
+    .detail-k { color: var(--text-muted); font-weight: 500; }
+    .detail-v { color: var(--text); }
+
+    .detail-section { margin-bottom: 20px; }
+    .detail-section h4 {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      color: var(--text-dim);
+      margin-bottom: 8px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .pros-cons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .pros-box, .cons-box {
+      background: var(--bg);
+      border-radius: 6px;
+      padding: 12px;
+      font-size: 12px;
+    }
+    .pros-box { border: 1px solid rgba(63,185,80,.3); }
+    .cons-box { border: 1px solid rgba(248,81,73,.3); }
+    .pros-box strong { color: var(--accent-2); display: block; margin-bottom: 6px; }
+    .cons-box strong { color: var(--accent-danger); display: block; margin-bottom: 6px; }
+    .pros-box li, .cons-box li { color: var(--text-muted); margin-left: 14px; margin-bottom: 3px; }
+
+    pre {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 14px;
+      overflow-x: auto;
+      font-size: 12px;
+      font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+      line-height: 1.5;
+      color: #e6edf3;
+    }
+    code { font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace; }
+
+    .source-list { list-style: none; }
+    .source-list li { margin-bottom: 4px; }
+    .source-list a {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 12px;
+      word-break: break-all;
+    }
+    .source-list a:hover { text-decoration: underline; }
+
+    /* ── Decision Matrix ── */
+    #tab-decide { padding: 32px 48px; }
+    .decide-title { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+    .decide-sub { color: var(--text-muted); font-size: 13px; margin-bottom: 28px; }
+    .matrix-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 14px;
+    }
+    .matrix-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+    }
+    .matrix-card h4 {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      margin-bottom: 10px;
+    }
+    .matrix-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .matrix-item:last-child { border-bottom: none; }
+    .matrix-condition {
+      font-size: 12px;
+      color: var(--text-muted);
+      flex: 1;
+    }
+    .matrix-tool {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent);
+      white-space: nowrap;
+    }
+
+    /* ── Spotify section ── */
+    #tab-spotify { padding: 32px 48px; }
+    .case-study {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 28px;
+      max-width: 860px;
+    }
+    .case-study h2 { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+    .case-study .case-sub { color: var(--text-muted); font-size: 13px; margin-bottom: 20px; }
+    .case-stat-row { display: flex; gap: 24px; margin-bottom: 24px; flex-wrap: wrap; }
+    .case-stat { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 12px 16px; }
+    .case-stat strong { display: block; font-size: 20px; font-weight: 700; color: var(--accent); }
+    .case-stat span { font-size: 11px; color: var(--text-muted); }
+    .timeline { position: relative; padding-left: 20px; }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 5px; top: 4px; bottom: 4px;
+      width: 2px;
+      background: var(--border);
+    }
+    .timeline-item { position: relative; margin-bottom: 16px; }
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -18px; top: 6px;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+    .timeline-year { font-size: 11px; font-weight: 700; color: var(--accent); margin-bottom: 2px; }
+    .timeline-text { font-size: 13px; color: var(--text-muted); }
+
+    /* Overlay */
+    #overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.4);
+      z-index: 190;
+    }
+    #overlay.open { display: block; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    @media (max-width: 900px) {
+      #sidebar { display: none; }
+      #main { margin-left: 0; }
+      #detail-panel { width: 100%; }
+      .tools-grid { grid-template-columns: 1fr !important; padding: 16px !important; }
+      .table-wrap, #tab-decide, #tab-spotify { padding: 16px !important; }
+      .hero { padding: 24px !important; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<nav id="sidebar">
+  <div id="sidebar-header">
+    <a href="../home/" style="display:inline-block;font-size:11px;color:var(--text-muted);text-decoration:none;margin-bottom:10px;letter-spacing:.02em;">← Home</a>
+    <h2>SDD Tools</h2>
+    <p>18 tools · March 2026</p>
+    <input id="search" type="text" placeholder="Filter tools..." autocomplete="off" />
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-label">AI-Native (2025–2026)</div>
+    <a href="#" class="nav-item" data-tool="spec-kit">Spec Kit <span class="nav-stars">⭐ 71K</span></a>
+    <a href="#" class="nav-item" data-tool="kiro">Kiro (AWS) <span class="nav-tag tag-prop">proprietary</span></a>
+    <a href="#" class="nav-item" data-tool="tessl">Tessl <span class="nav-tag tag-prop">$125M</span></a>
+    <a href="#" class="nav-item" data-tool="superpowers">Superpowers <span class="nav-stars">⭐ 88K</span></a>
+    <a href="#" class="nav-item" data-tool="bmad">BMAD-METHOD <span class="nav-stars">⭐ 19K</span></a>
+    <a href="#" class="nav-item" data-tool="gsd">GSD <span class="nav-stars">⭐ 25K</span></a>
+    <a href="#" class="nav-item" data-tool="openspec">OpenSpec <span class="nav-tag tag-open">open</span></a>
+    <a href="#" class="nav-item" data-tool="intent">Augment Intent <span class="nav-tag tag-prop">$60/mo</span></a>
+    <a href="#" class="nav-item" data-tool="ralph">Ralph Loop <span class="nav-tag tag-open">technique</span></a>
+    <a href="#" class="nav-item" data-tool="taskmaster">Taskmaster AI <span class="nav-tag tag-open">open</span></a>
+    <a href="#" class="nav-item" data-tool="speckitty">Spec Kitty <span class="nav-tag tag-open">open</span></a>
+    <a href="#" class="nav-item" data-tool="promptx">PromptX <span class="nav-tag tag-open">open</span></a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-label">Classic / API-First</div>
+    <a href="#" class="nav-item" data-tool="openapi">OpenAPI Generator <span class="nav-stars">⭐ 23K</span></a>
+    <a href="#" class="nav-item" data-tool="devika">Devika <span class="nav-stars">⭐ 19.5K</span></a>
+    <a href="#" class="nav-item" data-tool="buf">Buf (Protobuf) <span class="nav-stars">⭐ 10K</span></a>
+    <a href="#" class="nav-item" data-tool="asyncapi">AsyncAPI <span class="nav-stars">⭐ 4K</span></a>
+    <a href="#" class="nav-item" data-tool="cucumber">Cucumber/Gherkin <span class="nav-stars">⭐ 5K</span></a>
+    <a href="#" class="nav-item" data-tool="stoplight">Stoplight/Spectral <span class="nav-stars">⭐ 8.4K</span></a>
+  </div>
+</nav>
+
+<!-- Overlay -->
+<div id="overlay"></div>
+
+<!-- Detail Panel -->
+<div id="detail-panel">
+  <div id="panel-close">
+    <h3 id="panel-title">Tool Detail</h3>
+    <div id="close-btn">✕</div>
+  </div>
+  <div id="panel-body"></div>
+</div>
+
+<!-- Main -->
+<div id="main">
+  <!-- Hero -->
+  <div id="hero">
+    <h1>Spec-Driven Development <span>Tools Benchmark</span></h1>
+    <p>Research-grade comparison of 18 SDD tools — from AI-native frameworks to classic API-first generators. Data sourced from GitHub, Martin Fowler/Thoughtworks, Augment Code, and official docs. March 2026.</p>
+    <div class="hero-meta">
+      <div class="hero-stat"><strong>18</strong><span>tools covered</span></div>
+      <div class="hero-stat"><strong>170K+</strong><span>combined ⭐ (top 5)</span></div>
+      <div class="hero-stat"><strong>$125M</strong><span>Tessl funding</span></div>
+      <div class="hero-stat"><strong>3</strong><span>SDD rigor levels</span></div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <div class="tab active" data-tab="compare">Comparison Table</div>
+    <div class="tab" data-tab="tools">Tool Cards</div>
+    <div class="tab" data-tab="decide">Decision Matrix</div>
+    <div class="tab" data-tab="spotify">Spotify Case Study</div>
+  </div>
+
+  <!-- Tab: Compare -->
+  <div id="tab-compare" class="tab-content active">
+    <div class="table-wrap">
+      <div class="table-title">All 18 Tools — Side by Side</div>
+      <div class="table-subtitle">Click any row for full spec examples, strengths/weaknesses, and sources.</div>
+      <div class="filter-bar">
+        <button class="filter-btn on" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="ai-native">AI-Native</button>
+        <button class="filter-btn" data-filter="api-first">API-First</button>
+        <button class="filter-btn" data-filter="free">Free Only</button>
+        <button class="filter-btn" data-filter="open">Open Source</button>
+      </div>
+      <table id="compare-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Tool</th>
+            <th>Stars</th>
+            <th>SDD Level</th>
+            <th>Spec Format</th>
+            <th>Agent Lock-in</th>
+            <th>Price</th>
+            <th>Best For</th>
+            <th>Workflow</th>
+          </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Tab: Tools Grid -->
+  <div id="tab-tools" class="tab-content">
+    <div class="tools-grid" id="tools-grid"></div>
+  </div>
+
+  <!-- Tab: Decision Matrix -->
+  <div id="tab-decide" class="tab-content">
+    <div class="decide-title">Decision Matrix</div>
+    <div class="decide-sub">Map your context to the right tool. Hover a card to see its sources.</div>
+    <div class="matrix-grid">
+      <div class="matrix-card">
+        <h4>By Team Size</h4>
+        <div class="matrix-item">
+          <span class="matrix-condition">Solo developer, low friction</span>
+          <span class="matrix-tool">GSD / Superpowers</span>
+        </div>
+        <div class="matrix-item">
+          <span class="matrix-condition">Small team (2–10), agile</span>
+          <span class="matrix-tool">Spec Kit / OpenSpec</span>
+        </div>
+        <div class="matrix-item">
+          <span class="matrix-condition">Mid-size team (20–50)</span>
+          <span class="matrix-tool">BMAD / Augment Intent</span>
+        </div>
+        <div class="matrix-item">
+          <span class="matrix-condition">Enterprise (50+), complex SDLC</span>
+          <span class="matrix-tool">BMAD-METHOD</span>
+        </div>
+      </div>
+      <div class="matrix-card">
+        <h4>By Codebase Type</h4>
+        <div class="matrix-item">
+          <span class="matrix-condition">Greenfield / new project</span>
+          <span class="matrix-tool">Spec Kit / Superpowers</span>
+        </div>
+        <div class="matrix-item">
+          <span class="matrix-condition">Brownfield / legacy code</span>
+          <span class="matrix-tool">OpenSpec / Tessl</span>
+        </div>
+        <div class="matrix-item">
+          <span class="matrix-condition">Parallel feature development</span>
+          <span class="matrix-tool">Spec Kitty</span>
+        </div>
+        <div class="matrix-item">
+          <span class="matrix-condition">REST API contracts</span>
+          <span class="matrix-tool">OpenAPI Generator</span>
+        </div>
+        <div class="matrix-item">
+          <span class="matrix-condition">gRPC / microservices</span>
+          <span class="matrix-tool">Buf (Protobuf)</span>
+        </div>
+        <div class="matrix-item">
+          <span class="matrix-condition">Event-driven / Kafka</span>
+          <span class="matrix-tool">AsyncAPI</span>
+        </div>
+      </div>
+      <div class="matrix-card">
+        <h4>By Agent / IDE</h4>
+        <div class="matrix-item">
+          <span class="matrix-condition">Agent-agnostic (22+ tools)</span>
+          <span class="matrix-tool">Spec Kit</span>
+        </div>
+        <div class="matrix-item">
+          <span class="matrix-condition">Claude Code primary</span>
+          <span class="matrix-tool">GSD / BMAD</span>
+        </div>
+        <div class="matrix-item">
+          <span class="matrix-condition">Cursor primary</span>
+          <span class="matrix-tool">Taskmaster AI</span>
+        </div>
+        <div class="matrix-item">
+          <span class="matrix-condition">AWS ecosystem / Kiro IDE</span>
+          <span class="matrix-tool">Amazon Kiro</span>
+        </div>
+        <div class="matrix-item">
+          <span class="matrix-condition">BYOA (any agent)</span>
+          <span class="matrix-tool">Augment Intent</span>
+        </div>
+      </div>
+      <div class="matrix-card">
+        <h4>By Development Philosophy</h4>
+        <div class="matrix-item">
+          <span class="matrix-condition">Spec = source of truth, code = artifact</span>
+          <span class="matrix-tool">Tessl</span>
+        </div>
+        <div class="matrix-item">
+          <span class="matrix-condition">Strict TDD enforcement</span>
+          <span class="matrix-tool">Superpowers</span>
+        </div>
+        <div class="matrix-item">
+          <span class="matrix-condition">BDD / executable specs</span>
+          <span class="matrix-tool">Cucumber/Gherkin</span>
+        </div>
+        <div class="matrix-item">
+          <span class="matrix-condition">Autonomous overnight coding</span>
+          <span class="matrix-tool">Ralph Loop + spec tool</span>
+        </div>
+        <div class="matrix-item">
+          <span class="matrix-condition">API governance & linting</span>
+          <span class="matrix-tool">Stoplight/Spectral</span>
+        </div>
+      </div>
+      <div class="matrix-card">
+        <h4>By Budget</h4>
+        <div class="matrix-item">
+          <span class="matrix-condition">$0 — fully free OSS</span>
+          <span class="matrix-tool">Spec Kit, GSD, BMAD, Superpowers, OpenSpec</span>
+        </div>
+        <div class="matrix-item">
+          <span class="matrix-condition">Free with commercial option</span>
+          <span class="matrix-tool">Kiro (50 int/mo free), Stoplight</span>
+        </div>
+        <div class="matrix-item">
+          <span class="matrix-condition">$60–200/month (team)</span>
+          <span class="matrix-tool">Augment Intent</span>
+        </div>
+        <div class="matrix-item">
+          <span class="matrix-condition">Enterprise pricing</span>
+          <span class="matrix-tool">Tessl (closed beta)</span>
+        </div>
+      </div>
+      <div class="matrix-card">
+        <h4>SDD Rigor Levels (Fowler)</h4>
+        <div class="matrix-item">
+          <span class="matrix-condition">Spec-first (write spec, then code)</span>
+          <span class="matrix-tool">Kiro, GSD, Taskmaster, Superpowers</span>
+        </div>
+        <div class="matrix-item">
+          <span class="matrix-condition">Spec-anchored (spec lives long term)</span>
+          <span class="matrix-tool">Spec Kit, BMAD, OpenSpec, Intent</span>
+        </div>
+        <div class="matrix-item">
+          <span class="matrix-condition">Spec-as-source (humans edit specs only)</span>
+          <span class="matrix-tool">Tessl (aspiring)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab: Spotify -->
+  <div id="tab-spotify" class="tab-content">
+    <div class="case-study">
+      <h2>Spotify Case Study</h2>
+      <p class="case-sub">How one of the largest tech companies adopted SDD at scale — February 2026</p>
+      <div class="case-stat-row">
+        <div class="case-stat"><strong>Dec 2025</strong><span>Top devs stopped writing code</span></div>
+        <div class="case-stat"><strong>50+</strong><span>Features shipped in 2025</span></div>
+        <div class="case-stat"><strong>290M</strong><span>Premium subscribers (+10% YoY)</span></div>
+        <div class="case-stat"><strong>751M</strong><span>Monthly active users (+11%)</span></div>
+      </div>
+
+      <div class="detail-section">
+        <h4>What They Use</h4>
+        <div class="detail-kv">
+          <span class="detail-k">AI Agent</span><span class="detail-v">Claude Code (Anthropic)</span>
+          <span class="detail-k">Internal system</span><span class="detail-v">"Honk" — full feedback loop via Slack</span>
+          <span class="detail-k">API Specs</span><span class="detail-v">OpenAPI 3.0 (machine-readable, AI-consumable)</span>
+          <span class="detail-k">Dev portal</span><span class="detail-v">Backstage (since 2020)</span>
+          <span class="detail-k">Fleet mgmt</span><span class="detail-v">Fleet Management — mass changes across 1000+ repos (since 2022)</span>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <h4>How It Works</h4>
+        <pre>Engineer on commute → Sends Slack message:
+  "Fix the session expiry bug in the iOS auth service"
+
+Honk system:
+  1. Claude Code reads OpenAPI spec for auth service
+  2. Identifies affected endpoints and schemas
+  3. Implements fix
+  4. Runs tests via Fleet Management
+  5. Deploys to staging
+  6. Reports results back to Slack
+
+Engineer: reviews output, approves → merges</pre>
+      </div>
+
+      <div class="detail-section">
+        <h4>Infrastructure Timeline</h4>
+        <div class="timeline">
+          <div class="timeline-item">
+            <div class="timeline-year">2020</div>
+            <div class="timeline-text">Backstage launched — central developer portal, single source of truth for all services</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-year">2022</div>
+            <div class="timeline-text">Fleet Management built — automated code changes across hundreds of repositories simultaneously</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-year">2025</div>
+            <div class="timeline-text">Honk + Claude Code integration — full feedback loop from Slack to production</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-year">Dec 2025</div>
+            <div class="timeline-text">Senior engineers stop writing code manually. AI handles implementation end-to-end.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <h4>Key Lesson for Your Team</h4>
+        <p style="font-size:13px;color:var(--text-muted);line-height:1.7;">
+          Spotify's success came from <strong style="color:var(--text)">years of infrastructure investment before AI</strong> — not from switching to an AI tool overnight.
+          The SDD pattern (OpenAPI specs as machine-readable contracts) was in place before Claude Code arrived.
+          <br><br>
+          Sources: <a href="https://techcrunch.com/2026/02/12/spotify-says-its-best-developers-havent-written-a-line-of-code-since-december-thanks-to-ai/" target="_blank" style="color:var(--accent)">TechCrunch</a> ·
+          <a href="https://www.fastcompany.com/91493217/spotify-ai-coding-new-features-claude" target="_blank" style="color:var(--accent)">Fast Company</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const TOOLS = [
+  {
+    id: 'spec-kit',
+    name: 'GitHub Spec Kit',
+    maker: 'GitHub (Microsoft)',
+    stars: '~71,000',
+    sddLevel: 'spec-anchored',
+    specFormat: 'Markdown (constitution + specs + tasks)',
+    agentLock: 'None (22+ agents)',
+    price: 'Free',
+    priceType: 'free',
+    license: 'MIT',
+    category: 'ai-native',
+    bestFor: 'Agent-agnostic teams',
+    workflow: 'Constitution → Specify → Plan → Tasks → Implement → Analyze → PR',
+    desc: 'Open-source CLI toolkit. Constitution → Specify → Plan → Tasks → Implement → Analyze → PR. Supports 22+ AI agents with no vendor lock-in.',
+    install: 'uvx --from git+https://github.com/github/spec-kit.git specify init <PROJECT>',
+    specExample: `# constitution.md
+## Core Principles
+- APIs follow OpenAPI 3.1
+- JWT auth with refresh tokens
+- Integration tests for every endpoint
+
+## Tech Stack
+- Node.js + TypeScript + Express
+- PostgreSQL + Prisma
+
+---
+# Feature Spec (output of /specify)
+
+## What
+Email/password registration with email verification.
+
+## Acceptance Criteria
+- Email unique and valid format
+- Password: 8+ chars, 1 upper, 1 number
+- Returns 201 { id, email } | 409 | 400`,
+    strengths: ['Agent-agnostic (22+ agents)', 'MIT licensed, no cost', 'Constitution = project-wide guardrails', '/analyze quality gate', 'Backed by GitHub/Microsoft', '71K stars in <6 months'],
+    weaknesses: ['Verbose markdown overhead', 'Heavyweight for small bug fixes', 'Rigid phase gates', 'Requires Python (uvx)'],
+    links: [
+      { label: 'GitHub Repo', url: 'https://github.com/github/spec-kit' },
+      { label: 'Official Site', url: 'https://speckit.org/' },
+      { label: 'GitHub Blog', url: 'https://github.blog/ai-and-ml/generative-ai/spec-driven-development-with-ai-get-started-with-a-new-open-source-toolkit/' },
+      { label: 'Martin Fowler: Understanding SDD', url: 'https://martinfowler.com/articles/exploring-gen-ai/sdd-3-tools.html' },
+      { label: 'Scott Logic Critical Review', url: 'https://blog.scottlogic.com/2025/11/26/putting-spec-kit-through-its-paces-radical-idea-or-reinvented-waterfall.html' },
+    ]
+  },
+  {
+    id: 'kiro',
+    name: 'Amazon Kiro',
+    maker: 'AWS',
+    stars: 'Proprietary',
+    sddLevel: 'spec-first',
+    specFormat: 'Markdown w/ EARS notation (.kiro/specs/)',
+    agentLock: 'Claude Sonnet only',
+    price: 'Free (50 int/mo)',
+    priceType: 'free',
+    license: 'Proprietary',
+    category: 'ai-native',
+    bestFor: 'AWS-heavy teams',
+    workflow: 'Requirements (EARS) → Design Doc → Task List → Implement (Agent Hooks)',
+    desc: 'VS Code fork IDE by AWS. Turns natural language into EARS-notation requirements, design docs, and task lists. Built-in Agent Hooks for event-driven automation.',
+    install: 'Download from kiro.dev',
+    specExample: `# Feature: User Authentication
+# .kiro/specs/user-auth/requirements.md
+
+## Requirement 1: User Registration
+### User Story
+As a new user, I want to register with email/password.
+
+### Acceptance Criteria (EARS)
+- GIVEN a valid email and password
+  WHEN user submits registration form
+  THEN system creates account and sends verification email
+
+- GIVEN an existing email
+  WHEN user submits registration form
+  THEN system returns 409 Conflict`,
+    strengths: ['Integrated IDE experience', 'Agent Hooks (event-driven automation)', 'Agent Steering (persistent context)', 'Deep AWS service integration', 'Backed by Amazon'],
+    weaknesses: ['Vendor lock-in (AWS + Claude Sonnet)', 'Python/JS only at launch', '"Sledgehammer for a nail" for small fixes', 'Spec-first only (not anchored)'],
+    links: [
+      { label: 'kiro.dev', url: 'https://kiro.dev/' },
+      { label: 'Kiro Docs: Specs', url: 'https://kiro.dev/docs/specs/' },
+      { label: 'InfoQ: AWS Kiro Review', url: 'https://www.infoq.com/news/2025/08/aws-kiro-spec-driven-agent/' },
+      { label: 'Martin Fowler: Understanding SDD', url: 'https://martinfowler.com/articles/exploring-gen-ai/sdd-3-tools.html' },
+    ]
+  },
+  {
+    id: 'tessl',
+    name: 'Tessl Framework',
+    maker: 'Tessl (Guy Podjarny, ex-Snyk)',
+    stars: 'Closed beta',
+    sddLevel: 'spec-as-source',
+    specFormat: 'YAML (1:1 mapping to code files)',
+    agentLock: 'None (MCP server)',
+    price: 'Commercial',
+    priceType: 'paid',
+    license: 'Proprietary',
+    category: 'ai-native',
+    bestFor: 'Spec purists (code = artifact)',
+    workflow: 'Write Spec → Registry Lookup → Generate Code → Verify → (no manual edits)',
+    desc: 'The most ambitious SDD tool. Code files are generated from specs (marked // GENERATED FROM SPEC - DO NOT EDIT). Includes a Spec Registry with 10K+ library specs to prevent AI hallucinations.',
+    install: 'CLI (closed beta — request access at tessl.io)',
+    specExample: `service: UserService
+description: Manages user accounts
+
+models:
+  User:
+    fields:
+      - name: email
+        type: string
+        constraints: [unique, required, email_format]
+      - name: password_hash
+        type: string
+        constraints: [required]
+
+capabilities:
+  - name: register_user
+    input: { email: string, password: string }
+    output: User
+    tests:
+      - valid registration returns user (no password_hash)
+      - duplicate email returns 409
+      - invalid email returns 400
+
+# Generated code will have:
+# // GENERATED FROM SPEC - DO NOT EDIT`,
+    strengths: ['True spec-as-source (most ambitious)', 'Spec Registry prevents API hallucinations', '$125M funding — serious long-term', 'Reverse-engineers specs from existing code', 'MCP server (agent-agnostic)'],
+    weaknesses: ['Closed beta — not generally available', 'Commercial pricing unknown', '1:1 spec-to-file mapping may be rigid', 'Unproven at scale', 'Similar concerns to failed MDD'],
+    links: [
+      { label: 'tessl.io', url: 'https://tessl.io/' },
+      { label: 'Launch Announcement', url: 'https://tessl.io/blog/tessl-launches-spec-driven-framework-and-registry/' },
+      { label: 'Tessl Docs', url: 'https://docs.tessl.io/use/spec-driven-development-with-tessl' },
+      { label: 'Martin Fowler: Understanding SDD', url: 'https://martinfowler.com/articles/exploring-gen-ai/sdd-3-tools.html' },
+    ]
+  },
+  {
+    id: 'superpowers',
+    name: 'Superpowers',
+    maker: 'Jesse Vincent (obra)',
+    stars: '~88,400',
+    sddLevel: 'spec-first + TDD',
+    specFormat: 'Markdown (brainstorm → plan → tasks)',
+    agentLock: 'None',
+    price: 'Free',
+    priceType: 'free',
+    license: 'Open source',
+    category: 'ai-native',
+    bestFor: 'Strict TDD enforcement',
+    workflow: 'Brainstorm → [Gate] → Plan → [Gate] → Red (test) → Green (code) → Refactor',
+    desc: 'Highest-starred SDD tool. Forces Brainstorm → Plan → Implement with hard gates. Mandatory TDD — if code appears before tests, it gets deleted. Two-stage review per task.',
+    install: 'Clone repo, add skills to your agent',
+    specExample: `## Brainstorm: User Registration Feature
+
+### Questions Explored (Socratic)
+1. Auth strategy? → JWT (15min access / 7day refresh)
+2. Email verification required? → Yes, 24h expiry
+3. Rate limiting? → 5 attempts/IP/hour
+
+### Proposed Design
+[WAITING FOR HUMAN APPROVAL] ⏸️
+
+---
+## Plan (after approval)
+
+## Task 1: Write failing registration test (RED) — 3min
+# File: tests/auth/register.test.ts
+# Must FAIL initially — this is required
+
+## Task 2: Implement endpoint (GREEN) — 5min
+# Make tests pass, minimum code
+
+## Task 3: Refactor — 2min
+# Clean up, remove duplication`,
+    strengths: ['88K stars — fastest growing', 'Hard gates (no code before approval)', 'Mandatory TDD (delete code before tests)', 'Subagent per task (fresh context)', 'Two-stage review (spec + code quality)', 'Healthy skepticism of AI output'],
+    weaknesses: ['TDD may be too strict for some teams', 'Less enterprise SDLC than BMAD', 'Spec-first only (not anchored)'],
+    links: [
+      { label: 'GitHub Repo', url: 'https://github.com/obra/superpowers' },
+      { label: 'Better Stack Guide', url: 'https://betterstack.com/community/guides/ai/superpowers-framework/' },
+      { label: 'Hacker News Discussion', url: 'https://news.ycombinator.com/item?id=47341827' },
+      { label: 'Framework Showdown (Medium)', url: 'https://medium.com/@richardhightower/the-great-framework-showdown-superpowers-vs-bmad-vs-speckit-vs-gsd-360983101c10' },
+    ]
+  },
+  {
+    id: 'bmad',
+    name: 'BMAD-METHOD',
+    maker: 'BMad Code (community)',
+    stars: '~19,100',
+    sddLevel: 'spec-anchored',
+    specFormat: 'Markdown (PRDs + arch docs + stories)',
+    agentLock: 'None (Claude Code recommended)',
+    price: 'Free',
+    priceType: 'free',
+    license: 'Open source (no paywalls)',
+    category: 'ai-native',
+    bestFor: 'Enterprise agile teams',
+    workflow: 'Brief → Analyst → PM (PRD) → Architect (ADR) → Scrum Master → Dev → QA',
+    desc: '21 specialized AI agents (Analyst, PM, Architect, Scrum Master, Dev, QA...) simulate a full agile team. 50+ guided workflows. Scale-adaptive — adjusts from bug fixes to enterprise systems.',
+    install: 'Clone repo, configure agents per your AI assistant',
+    specExample: `# BMAD Agent Flow
+
+User: "Build user registration with email verification"
+
+→ Analyst Agent
+  Q: Email provider? (SendGrid/SES)
+  Q: Password policy? GDPR compliance?
+
+→ PM Agent (PRD)
+  ## User Stories
+  US-001: Register with email/password
+  US-002: Receive verification email
+  US-003: Login after verification
+
+→ Architect Agent (ADR)
+  Auth: JWT (15min/7day)
+  Email: SendGrid transactional
+  DB: PostgreSQL + Prisma
+
+→ Scrum Master Agent
+  ## Story: US-001 (full context embedded)
+  Steps: schema → repository → endpoint → tests
+  Acceptance: [ ] unique email [ ] bcrypt hash [ ] 201 response`,
+    strengths: ['Most comprehensive (21 agents, 50+ workflows)', 'Simulates full agile team', '100% free, no paywalls or Discord gates', 'Scale-adaptive intelligence', 'Active community (19K+ Discord members)'],
+    weaknesses: ['High learning curve', 'Heavy overhead for simple tasks', 'Can feel like process theater'],
+    links: [
+      { label: 'GitHub Repo', url: 'https://github.com/bmad-code-org/BMAD-METHOD' },
+      { label: 'Official Docs', url: 'https://docs.bmad-method.org/' },
+      { label: 'What is BMAD? (Medium)', url: 'https://medium.com/@visrow/what-is-bmad-method-a-simple-guide-to-the-future-of-ai-driven-development-412274f91419' },
+    ]
+  },
+  {
+    id: 'gsd',
+    name: 'GSD (Get Stuff Done)',
+    maker: 'Community (glittercowboy)',
+    stars: '~24,900',
+    sddLevel: 'spec-first',
+    specFormat: 'Markdown (Project File + Roadmap + State)',
+    agentLock: 'Claude Code primary (20+ tools)',
+    price: 'Free',
+    priceType: 'free',
+    license: 'MIT',
+    category: 'ai-native',
+    bestFor: 'Solo devs (low friction)',
+    workflow: 'Project File → Roadmap → State → Task (fresh context) → Commit → Repeat',
+    desc: 'Lightweight context engineering layer. Each atomic task runs in a fresh 200K token sub-agent context. Git is the memory layer. Three documents: Project File (what), Roadmap (how), State (where am I).',
+    install: 'Clone repo, integrate into project',
+    specExample: `# Project File (what)
+## Core Values
+- Security first — bcrypt, rate limiting, JWT
+- Repository pattern (no DB queries in controllers)
+
+## Key Requirements
+- Email/password registration with verification
+- JWT auth (15min access, 7day refresh)
+- PostgreSQL + Prisma
+
+---
+# State Document (auto-updated after each task)
+## Phase: 2 (Auth)
+## Last Completed: Database schema + User model
+## Next Task: Registration endpoint
+## Blockers: None`,
+    strengths: ['Fresh 200K context per task — no degradation', 'Git as memory — simple and auditable', 'Lowest overhead for solo devs', 'MIT, free forever'],
+    weaknesses: ['Primarily for solo devs', 'Claude Code is primary target', 'No built-in quality gates', 'Spec-first only'],
+    links: [
+      { label: 'GitHub Repo', url: 'https://github.com/glittercowboy/get-shit-done' },
+      { label: 'Chase AI Blog', url: 'https://www.chaseai.io/blog/gsd-claude-code-solo-developer' },
+      { label: 'GSD vs Spec Kit vs OpenSpec (Medium)', url: 'https://medium.com/@richardhightower/agentic-coding-gsd-vs-spec-kit-vs-openspec-vs-taskmaster-ai-where-sdd-tools-diverge-0414dcb97e46' },
+    ]
+  },
+  {
+    id: 'openspec',
+    name: 'OpenSpec',
+    maker: 'Fission AI',
+    stars: 'Growing',
+    sddLevel: 'spec-anchored',
+    specFormat: 'Markdown (proposals + specs + design + tasks)',
+    agentLock: 'None (20+ agents)',
+    price: 'Free',
+    priceType: 'free',
+    license: 'Open source',
+    category: 'ai-native',
+    bestFor: 'Brownfield / existing codebases',
+    workflow: 'Propose → Spec → Design → Tasks → Apply → Archive',
+    desc: 'Brownfield-first. Two-folder model: openspec/specs/ (current truth) + openspec/changes/ (proposed). Each change gets its own isolated folder. Propose → Apply → Archive.',
+    install: 'npm install -g @fission-ai/openspec@latest',
+    specExample: `# Propose a change
+/opsx:propose add-user-registration
+
+# Creates:
+openspec/changes/add-user-registration/
+├── proposal.md      # What & why
+├── specs/
+│   ├── user-model.md
+│   └── auth-endpoints.md
+├── design.md        # Technical approach
+└── tasks.md         # Implementation steps
+
+# auth-endpoints.md:
+## POST /auth/register
+- Input: { email: string, password: string }
+- Returns: 201 { id, email } | 409 | 400
+
+# Apply & archive
+/opsx:apply
+/opsx:archive`,
+    strengths: ['Purpose-built for brownfield (1→n)', 'Change isolation prevents conflicts', 'No API keys, no MCP required', 'Agent-agnostic (20+ agents)', 'Lightweight ceremony'],
+    weaknesses: ['Less mature ecosystem', 'Smaller community', 'Less documentation'],
+    links: [
+      { label: 'GitHub Repo', url: 'https://github.com/Fission-AI/OpenSpec' },
+      { label: 'openspec.dev', url: 'https://openspec.dev/' },
+      { label: 'OpenSpec Deep Dive', url: 'https://redreamality.com/garden/notes/openspec-guide/' },
+    ]
+  },
+  {
+    id: 'intent',
+    name: 'Augment Intent',
+    maker: 'Augment Code',
+    stars: 'N/A',
+    sddLevel: 'spec-anchored',
+    specFormat: 'Living specs (auto-updating markdown)',
+    agentLock: 'BYOA (Claude Code, Codex, OpenCode)',
+    price: '$60–200/month',
+    priceType: 'paid',
+    license: 'Proprietary',
+    category: 'ai-native',
+    bestFor: 'Enterprise multi-agent orchestration',
+    workflow: 'Spec → Coordinator → Parallelize (6 specialists) → Living Spec Update → Verify',
+    desc: 'Multi-agent orchestration workspace. Three-agent arch: Coordinator (plans) → Specialists (6 parallel roles) → Verifier. Living specs auto-update as code changes. Processes 400K+ files.',
+    install: 'Download from augmentcode.com (macOS only)',
+    specExample: `# Living Spec: User Registration (auto-maintained)
+
+## Status: In Progress
+- [x] Database schema designed
+- [x] User model implemented
+- [ ] Registration endpoint
+- [ ] Email verification flow
+- [ ] Integration tests
+
+## Architecture Decisions (set by Coordinator)
+- Auth: JWT (15min/7day) — approved
+- Email: SendGrid transactional
+
+## Active Tasks
+| Task                | Specialist       | Status      |
+|---------------------|------------------|-------------|
+| Prisma schema       | Architecture     | ✅ Complete  |
+| Register endpoint   | Implementation   | 🔄 Active   |
+| Security scan       | Security         | ⏳ Pending  |
+| Integration tests   | Testing          | ⏳ Pending  |`,
+    strengths: ['Living specs auto-update (no spec rot)', 'Multi-agent orchestration (6 specialists)', 'Context Engine processes 400K+ files', 'BYOA — not locked to one agent', '34.2% task time reduction (research)'],
+    weaknesses: ['$60–200/month', 'macOS only (Apple Silicon)', 'Credit-based pricing limits', 'Newer, less community validation'],
+    links: [
+      { label: 'augmentcode.com/product/intent', url: 'https://www.augmentcode.com/product/intent' },
+      { label: 'Intent Docs', url: 'https://docs.augmentcode.com/intent/overview' },
+      { label: 'What Is SDD? (Augment)', url: 'https://www.augmentcode.com/guides/what-is-spec-driven-development' },
+    ]
+  },
+  {
+    id: 'ralph',
+    name: 'Ralph Loop',
+    maker: 'Geoffrey Huntley (community)',
+    stars: 'Various impls',
+    sddLevel: 'spec-first (loop)',
+    specFormat: 'Any — works with any spec framework',
+    agentLock: 'None',
+    price: 'Free',
+    priceType: 'free',
+    license: 'Open source',
+    category: 'ai-native',
+    bestFor: 'Autonomous overnight coding',
+    workflow: 'Write Spec → Loop: Pick Task → Implement → Test → Commit → Repeat until done',
+    desc: 'A technique, not a framework. Runs AI agents in bash loops until specs are fulfilled. Each iteration = fresh agent + clean context. Git is the memory layer. A dev shipped 100K LOC in 2 weeks.',
+    install: 'Various: smart-ralph, speckit-ralph, ralph-wiggum, awesome-ralph',
+    specExample: `#!/bin/bash
+# The Ralph Loop
+while true; do
+  claude-code --prompt "
+    Read specs in ./specs/
+    Pick next incomplete task from tasks.md
+    Implement it following the spec
+    Run tests. If pass, commit + mark complete.
+    Output DONE.
+  "
+
+  # Check completion
+  if ! grep -q "- \\[ \\]" tasks.md; then
+    echo "All tasks complete!"
+    break
+  fi
+
+  echo "Restarting with fresh 200K context..."
+done
+
+# Result: every commit is traceable
+# git bisect finds exact bugs`,
+    strengths: ['Fresh 200K context per iteration', 'Git as memory — zero overhead', 'Agent-agnostic', 'Enables autonomous overnight coding', '100K LOC in 2 weeks (real case study)', 'Combines with ANY spec framework'],
+    weaknesses: ['A technique, not a framework (needs spec tool alongside)', 'Burns API credits fast', 'Requires strong test suite', 'Risk of drift without solid specs'],
+    links: [
+      { label: 'awesome-ralph (curated list)', url: 'https://github.com/snwfdhmp/awesome-ralph' },
+      { label: 'ralph-wiggum implementation', url: 'https://github.com/fstandhartinger/ralph-wiggum' },
+      { label: '100K LOC in 2 Weeks', url: 'https://alexlavaee.me/blog/ai-coding-infrastructure/' },
+      { label: 'SDD + Ralph Wiggum (Medium)', url: 'https://new2026.medium.com/ralph-wiggum-loops-are-hot-right-now-heres-how-spec-driven-development-makes-them-actually-977bf8eb1959' },
+    ]
+  },
+  {
+    id: 'taskmaster',
+    name: 'Taskmaster AI',
+    maker: 'Eyal Toledano',
+    stars: 'Popular (many forks)',
+    sddLevel: 'spec-first',
+    specFormat: 'PRD text → auto-generated tasks (JSON)',
+    agentLock: 'Cursor primary (20+ tools)',
+    price: 'Free',
+    priceType: 'free',
+    license: 'Open source',
+    category: 'ai-native',
+    bestFor: 'Cursor users',
+    workflow: 'PRD → Parse → Tasks (JSON+deps) → next → Implement → Done',
+    desc: 'AI-powered task management. Parses PRDs into structured tasks with dependencies. MCP integration for editor-native experience. Core mode reduces tokens 70%.',
+    install: 'npm install -g task-master-ai && task-master init',
+    specExample: `# PRD input (plain text):
+"Build email/password registration with JWT auth.
+Password: 8+ chars, 1 upper, 1 number.
+Send verification email via SendGrid."
+
+# Generated tasks:
+task-master parse-prd prd.txt
+
+{
+  "id": 1,
+  "title": "Set up database schema",
+  "status": "pending",
+  "dependencies": [],
+  "priority": "high"
+},
+{
+  "id": 2,
+  "title": "Implement User repository",
+  "dependencies": [1],
+  "priority": "high"
+},
+{
+  "id": 3,
+  "title": "Build registration endpoint",
+  "dependencies": [1, 2],
+  "priority": "high"
+}
+
+# CLI:
+task-master next    # shows next task
+task-master list    # all tasks with status`,
+    strengths: ['Native Cursor integration (auto-loaded rules)', 'MCP for editor-native experience', '70% token reduction (core mode)', 'Multiple AI provider support', 'Intuitive PRD-to-tasks pipeline'],
+    weaknesses: ['Primarily for Cursor', 'No spec evolution (spec-first only)', 'Task decomposition can miss nuances'],
+    links: [
+      { label: 'GitHub Repo', url: 'https://github.com/eyaltoledano/claude-task-master' },
+      { label: 'Tutorial/Docs', url: 'https://github.com/eyaltoledano/claude-task-master/blob/main/docs/tutorial.md' },
+    ]
+  },
+  {
+    id: 'speckitty',
+    name: 'Spec Kitty',
+    maker: 'Priivacy AI',
+    stars: 'Growing',
+    sddLevel: 'spec-anchored',
+    specFormat: 'Markdown (spec → plan → tasks)',
+    agentLock: 'None (Claude, Cursor, Gemini, Codex)',
+    price: 'Free',
+    priceType: 'free',
+    license: 'Open source',
+    category: 'ai-native',
+    bestFor: 'Parallel features + git worktrees',
+    workflow: 'Spec → Plan → Worktree (isolated) → Implement → Review → Merge',
+    desc: 'Only SDD tool with built-in worktree management and parallel feature isolation. Kanban dashboard, auto-merge, two missions: Software Dev and Deep Research.',
+    install: 'pip install spec-kitty-cli && spec-kitty init project --ai claude',
+    specExample: `# Kanban Dashboard
+| Spec      | Plan     | Implement  | Review   | Done     |
+|-----------|----------|------------|----------|----------|
+| dark-mode | user-reg | api-cache  | payments | onboard  |
+
+# Each feature = isolated git worktree
+# worktrees/user-registration/
+#   .spec-kitty/
+#     spec.md     → feature specification
+#     plan.md     → technical plan
+#     tasks.md    → implementation tasks
+
+# spec.md example:
+## Feature: User Registration
+## Acceptance Criteria
+- Valid email (unique in system)
+- Password: 8+ chars, 1 upper, 1 number
+- 201 { id, email } | 409 | 400`,
+    strengths: ['Only tool with built-in git worktree management', 'Parallel features without conflicts', 'Kanban dashboard for visual tracking', 'Auto-merge capability'],
+    weaknesses: ['Smaller community', 'Requires Python', 'Less documentation than established tools'],
+    links: [
+      { label: 'GitHub Repo', url: 'https://github.com/Priivacy-ai/spec-kitty' },
+      { label: 'Documentation', url: 'https://priivacy-ai.github.io/spec-kitty/' },
+      { label: 'spec-compare (6 tools compared)', url: 'https://github.com/cameronsjo/spec-compare' },
+    ]
+  },
+  {
+    id: 'promptx',
+    name: 'PromptX',
+    maker: 'Deepractice',
+    stars: 'Growing',
+    sddLevel: 'role-based',
+    specFormat: 'Natural language roles',
+    agentLock: 'None (MCP server)',
+    price: 'Free',
+    priceType: 'free',
+    license: 'Open source',
+    category: 'ai-native',
+    bestFor: 'Natural language role assignment',
+    workflow: 'Intent → Activate Role → Context Loading → Implement',
+    desc: '"One sentence, one expert." 8 built-in specialist roles. MCP server integration. Academic: accepted at WWW Companion \'26. Most natural/intuitive SDD approach.',
+    install: 'npx -y @promptx/mcp-server',
+    specExample: `# Activate a role with one sentence:
+"I need a backend architect specializing in
+microservices and event-driven architecture"
+
+# PromptX creates:
+Role: Backend Architect
+Expertise: Microservices, Kafka, gRPC, PostgreSQL
+Behavior:
+  - Always spec APIs contract-first (OpenAPI)
+  - Consider fault tolerance and scalability
+  - Prefer event sourcing for complex domains
+
+# For user registration:
+  1. Define bounded context (Auth service)
+  2. Design events: UserRegistered, EmailVerified
+  3. Spec API contract first, then implement
+  4. Recommend integration tests over unit tests`,
+    strengths: ['Most natural/intuitive approach', 'No config files or YAML setup', 'MCP server integration', 'Academic peer review (WWW \'26)', '8 built-in specialist roles'],
+    weaknesses: ['Less structured than dedicated spec frameworks', 'Smaller community', 'May lack guardrails for complex projects'],
+    links: [
+      { label: 'GitHub Repo', url: 'https://github.com/Deepractice/PromptX' },
+      { label: 'BMAD vs spec-kit vs OpenSpec vs PromptX', url: 'https://redreamality.com/blog/-sddbmad-vs-spec-kit-vs-openspec-vs-promptx/' },
+    ]
+  },
+  {
+    id: 'openapi',
+    name: 'OpenAPI Generator',
+    maker: 'OpenAPI Tools (community)',
+    stars: '~23,000',
+    sddLevel: 'api-first',
+    specFormat: 'OpenAPI 2.0/3.0/3.1 (YAML/JSON)',
+    agentLock: 'N/A (not AI-based)',
+    price: 'Free',
+    priceType: 'free',
+    license: 'Apache-2.0',
+    category: 'api-first',
+    bestFor: 'REST API code generation (50+ langs)',
+    workflow: 'Design API → Write OpenAPI Spec → Generate SDK/Stubs → Implement logic',
+    desc: 'The classic. Write OpenAPI spec, generate client SDKs, server stubs, and docs in 50+ languages. Template-based (Mustache/Handlebars). Used by Google, Stripe, Twilio, Spotify.',
+    install: 'npm install @openapitools/openapi-generator-cli -g',
+    specExample: `# spec.yaml (OpenAPI 3.0)
+openapi: 3.0.3
+paths:
+  /users:
+    post:
+      operationId: createUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string, minLength: 8 }
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '409':
+          description: Email already exists
+
+# Generate TypeScript client:
+openapi-generator-cli generate \\
+  -i spec.yaml \\
+  -g typescript-axios \\
+  -o ./client
+
+# Output: fully typed API client, no manual work`,
+    strengths: ['Most mature (6+ years, 3500+ contributors)', '50+ language targets', 'Deterministic output (no AI variability)', 'Industry standard at FAANG', 'Custom templates for full control'],
+    weaknesses: ['Not AI-powered', 'Generated code can be verbose', 'Only for API contracts', 'Custom templates have learning curve'],
+    links: [
+      { label: 'GitHub Repo', url: 'https://github.com/OpenAPITools/openapi-generator' },
+      { label: 'openapi-generator.tech', url: 'https://openapi-generator.tech/' },
+      { label: 'Swagger.io', url: 'https://swagger.io/' },
+    ]
+  },
+  {
+    id: 'devika',
+    name: 'Devika',
+    maker: 'Mufeed VH / Stition AI',
+    stars: '~19,500',
+    sddLevel: 'autonomous',
+    specFormat: 'Natural language → agent decomposition',
+    agentLock: 'None (Claude, GPT-4, Gemini, local LLMs)',
+    price: 'Free',
+    priceType: 'free',
+    license: 'MIT',
+    category: 'api-first',
+    bestFor: 'Full autonomy / Devin alternative',
+    workflow: 'Describe → Research → Decompose → Implement → Document',
+    desc: 'First open-source autonomous AI software engineer (Devin alternative). Understands high-level instructions, researches, and codes. Supports Claude, GPT-4, Gemini, and Ollama local models.',
+    install: 'git clone https://github.com/stitionai/devika && python -m devika',
+    specExample: `# Input (natural language):
+"Build a user registration API with email verification
+using Express.js, PostgreSQL, and SendGrid.
+Include JWT authentication and rate limiting."
+
+# Devika's internal decomposition:
+Step 1: Research best practices for Express.js auth
+Step 2: Set up project structure (Express + TS)
+Step 3: Create DB schema (users, tokens)
+Step 4: Implement registration + bcrypt hashing
+Step 5: Set up SendGrid email service
+Step 6: Add email verification flow
+Step 7: Implement JWT token issuance
+Step 8: Add rate limiting middleware
+Step 9: Write tests
+Step 10: Create API documentation`,
+    strengths: ['Fully autonomous (minimal human input)', 'Supports local LLMs (Ollama)', 'Web research capabilities', 'MIT licensed, 19.5K stars', 'Multi-LLM support'],
+    weaknesses: ['Early/experimental — many broken features', 'Less predictable without formal specs', 'No formal spec evolution', 'Autonomous without guardrails'],
+    links: [
+      { label: 'GitHub Repo', url: 'https://github.com/stitionai/devika' },
+      { label: 'Architecture Docs', url: 'https://github.com/stitionai/devika/blob/main/ARCHITECTURE.md' },
+    ]
+  },
+  {
+    id: 'buf',
+    name: 'Buf (Protobuf)',
+    maker: 'Buf Technologies',
+    stars: '~10,000',
+    sddLevel: 'api-first',
+    specFormat: 'Protocol Buffers (.proto files)',
+    agentLock: 'N/A',
+    price: 'Free CLI / Paid registry',
+    priceType: 'free',
+    license: 'Apache-2.0',
+    category: 'api-first',
+    bestFor: 'gRPC / microservices teams',
+    workflow: 'Design (.proto) → Lint → Breaking Change Check → Generate Stubs → Implement',
+    desc: 'Modern Protobuf toolchain: linting, breaking change detection, code generation, and schema registry. Replaces raw protoc with declarative buf.yaml. Buf Schema Registry (BSR) for sharing.',
+    install: 'brew install bufbuild/buf/buf',
+    specExample: `# user.proto
+syntax = "proto3";
+package user.v1;
+
+service UserService {
+  rpc CreateUser(CreateUserRequest) returns (User);
+  rpc VerifyEmail(VerifyEmailRequest) returns (VerifyEmailResponse);
+}
+
+message CreateUserRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message User {
+  string id = 1;
+  string email = 2;
+  google.protobuf.Timestamp created_at = 3;
+  bool verified = 4;
+}
+
+# buf.yaml
+version: v2
+lint:
+  use: [DEFAULT]
+breaking:
+  use: [FILE]
+
+# Generate:
+buf generate  # → Go, TS, Python stubs`,
+    strengths: ['Best-in-class Protobuf tooling', 'Breaking change detection in CI', 'Schema registry for versioned sharing', 'Replaces complex protoc workflows'],
+    weaknesses: ['Protobuf/gRPC only', 'Not AI-powered', 'Learning curve for REST teams', 'Commercial registry for advanced features'],
+    links: [
+      { label: 'buf.build', url: 'https://buf.build/' },
+      { label: 'GitHub Repo', url: 'https://github.com/bufbuild/buf' },
+      { label: 'Buf Docs', url: 'https://buf.build/docs/' },
+    ]
+  },
+  {
+    id: 'asyncapi',
+    name: 'AsyncAPI',
+    maker: 'AsyncAPI Initiative (Linux Foundation)',
+    stars: '~4,000',
+    sddLevel: 'api-first',
+    specFormat: 'AsyncAPI YAML/JSON',
+    agentLock: 'N/A',
+    price: 'Free',
+    priceType: 'free',
+    license: 'Apache-2.0',
+    category: 'api-first',
+    bestFor: 'Event-driven APIs (Kafka, MQTT, WebSocket)',
+    workflow: 'Design Events → AsyncAPI Schema → Validate → Generate Code → Implement handlers',
+    desc: 'OpenAPI equivalent for event-driven architectures. Defines message schemas, channels, and operations for Kafka, RabbitMQ, MQTT, WebSocket. Linux Foundation project.',
+    install: 'npm install -g @asyncapi/cli',
+    specExample: `asyncapi: 3.0.0
+info:
+  title: User Events Service
+  version: 1.0.0
+
+channels:
+  userRegistered:
+    address: user/registered
+    messages:
+      UserRegisteredMessage:
+        payload:
+          type: object
+          properties:
+            userId: { type: string, format: uuid }
+            email: { type: string, format: email }
+            registeredAt: { type: string, format: date-time }
+
+operations:
+  publishUserRegistered:
+    action: send
+    channel:
+      $ref: '#/channels/userRegistered'
+    summary: Publish when a new user registers`,
+    strengths: ['Standard for event-driven specs (like OpenAPI for REST)', 'Covers Kafka, RabbitMQ, MQTT, WebSocket', 'Linux Foundation — strong governance', 'Code generation for multiple languages'],
+    weaknesses: ['Smaller ecosystem than OpenAPI', 'Async APIs only', 'Not AI-powered'],
+    links: [
+      { label: 'asyncapi.com', url: 'https://www.asyncapi.com/' },
+      { label: 'GitHub Spec', url: 'https://github.com/asyncapi/spec' },
+      { label: 'AsyncAPI Docs', url: 'https://www.asyncapi.com/docs' },
+    ]
+  },
+  {
+    id: 'cucumber',
+    name: 'Cucumber / Gherkin',
+    maker: 'Cucumber Ltd / SmartBear',
+    stars: '~5,000',
+    sddLevel: 'bdd',
+    specFormat: 'Gherkin (.feature — Given/When/Then)',
+    agentLock: 'N/A',
+    price: 'Free',
+    priceType: 'free',
+    license: 'MIT',
+    category: 'api-first',
+    bestFor: 'BDD / executable specs / QA-driven',
+    workflow: 'Write Gherkin (Given/When/Then) → Step Defs → Run (fail) → Implement → Pass',
+    desc: 'The OG spec-driven tool (20+ years). Gherkin specs ARE the tests — executable living documentation. Non-technical stakeholders can read and write them. Multi-language.',
+    install: 'npm install @cucumber/cucumber',
+    specExample: `# user-registration.feature
+Feature: User Registration
+  As a new user, I want to register with email/password.
+
+  Scenario: Successful registration
+    Given I have valid email "user@example.com"
+    And I have valid password "SecurePass1"
+    When I submit the registration form
+    Then I should receive a 201 response
+    And the response should contain my user ID
+    And I should receive a verification email
+
+  Scenario: Duplicate email
+    Given user "user@example.com" already exists
+    When I register with "user@example.com"
+    Then I should receive a 409 response
+
+  Scenario Outline: Invalid emails
+    When I register with email "<email>"
+    Then I should receive a 400 response
+    Examples:
+      | email         |
+      | not-an-email  |
+      | @missing.com  |`,
+    strengths: ['Specs ARE tests — no drift possible', '20+ years battle-tested', 'Non-technical stakeholders can write specs', 'Multi-language (Java, JS, Ruby, Python, Go, .NET)'],
+    weaknesses: ['Not AI-powered', 'Step definitions = maintenance burden', 'Not suitable as general SDD framework'],
+    links: [
+      { label: 'cucumber.io', url: 'https://cucumber.io/' },
+      { label: 'GitHub: cucumber-js', url: 'https://github.com/cucumber/cucumber-js' },
+      { label: 'Gherkin Reference', url: 'https://cucumber.io/docs/gherkin/reference/' },
+    ]
+  },
+  {
+    id: 'stoplight',
+    name: 'Stoplight / Spectral',
+    maker: 'Stoplight (SmartBear)',
+    stars: 'Spectral ~2.5K, Prism ~4.2K',
+    sddLevel: 'api-first',
+    specFormat: 'OpenAPI 2.0/3.0/3.1',
+    agentLock: 'N/A',
+    price: 'Free tools / Paid platform',
+    priceType: 'free',
+    license: 'Apache-2.0 (tools)',
+    category: 'api-first',
+    bestFor: 'API governance & mocking',
+    workflow: 'Design OpenAPI Spec → Lint (Spectral) → Mock (Prism) → Implement → Re-lint',
+    desc: 'Spectral: ESLint for OpenAPI specs. Prism: instant mock server from your spec. API governance at scale. Used by Zoom, EA, SendGrid.',
+    install: 'npm install -g @stoplight/spectral-cli @stoplight/prism-cli',
+    specExample: `# .spectral.yaml — API style guide
+extends: spectral:oas
+rules:
+  operation-operationId:
+    severity: error
+    description: Every operation must have an operationId
+  operation-description:
+    severity: warn
+  paths-kebab-case:
+    severity: error
+
+# Run linting:
+spectral lint openapi.yaml
+# ✖ 3 problems (1 error, 2 warnings)
+
+# Run mock server from spec:
+prism mock openapi.yaml
+# Mock server running at http://127.0.0.1:4010
+
+# Test it:
+curl http://localhost:4010/users \\
+  -X POST -d '{"email":"a@b.com","password":"Pass1!"}'
+# → Returns mock response from spec examples`,
+    strengths: ['Best-in-class API linting (like ESLint for OpenAPI)', 'Automatic mock server from specs', 'Custom linting rules per org standards', 'Open-source core tools (Apache-2.0)'],
+    weaknesses: ['Not a code generator', 'OpenAPI only', 'Not AI-powered', 'Commercial platform for full features'],
+    links: [
+      { label: 'Spectral GitHub', url: 'https://github.com/stoplightio/spectral' },
+      { label: 'Prism GitHub', url: 'https://github.com/stoplightio/prism' },
+      { label: 'stoplight.io', url: 'https://stoplight.io/' },
+    ]
+  },
+];
+
+const SDD_BADGE = {
+  'spec-first': ['sdd-first', 'Spec-First'],
+  'spec-first + TDD': ['sdd-first', 'Spec-First + TDD'],
+  'spec-anchored': ['sdd-anchored', 'Spec-Anchored'],
+  'spec-as-source': ['sdd-source', 'Spec-as-Source'],
+  'spec-first (loop)': ['sdd-first', 'Spec-First (Loop)'],
+  'autonomous': ['sdd-autonomous', 'Autonomous'],
+  'api-first': ['sdd-api', 'API-First'],
+  'bdd': ['sdd-bdd', 'BDD'],
+  'role-based': ['sdd-anchored', 'Role-Based'],
+};
+
+// ── Render table ──
+function renderTable(tools) {
+  const tbody = document.getElementById('table-body');
+  tbody.innerHTML = '';
+  tools.forEach((t, i) => {
+    const [cls, label] = SDD_BADGE[t.sddLevel] || ['sdd-first', t.sddLevel];
+    const row = document.createElement('tr');
+    row.dataset.tool = t.id;
+    row.innerHTML = `
+      <td style="color:var(--text-dim);font-size:12px">${i + 1}</td>
+      <td>
+        <div class="tool-name">${t.name}</div>
+        <div class="tool-maker">${t.maker}</div>
+      </td>
+      <td><span class="stars-badge">${t.stars !== 'N/A' && t.stars !== 'Proprietary' && t.stars !== 'Closed beta' && t.stars !== 'Growing' && t.stars !== 'Various impls' && t.stars !== 'Popular (many forks)' ? '⭐ ' : ''}${t.stars}</span></td>
+      <td><span class="sdd-badge ${cls}">${label}</span></td>
+      <td style="color:var(--text-muted);font-size:12px;max-width:200px">${t.specFormat}</td>
+      <td class="${t.agentLock === 'None' || t.agentLock === 'N/A' ? 'lock-none' : 'lock-yes'}" style="font-size:12px">${t.agentLock}</td>
+      <td class="${t.priceType === 'free' ? 'price-free' : 'price-paid'}">${t.price}</td>
+      <td style="color:var(--text-muted);font-size:12px">${t.bestFor}</td>
+      <td style="font-size:11px;color:var(--accent-3);font-family:'SFMono-Regular',Consolas,monospace;white-space:nowrap">${t.workflow || '—'}</td>
+    `;
+    row.addEventListener('click', () => openPanel(t.id));
+    tbody.appendChild(row);
+  });
+}
+
+// ── Render cards ──
+function renderCards(tools) {
+  const grid = document.getElementById('tools-grid');
+  grid.innerHTML = '';
+  tools.forEach(t => {
+    const [cls, label] = SDD_BADGE[t.sddLevel] || ['sdd-first', t.sddLevel];
+    const card = document.createElement('div');
+    card.className = 'tool-card';
+    card.dataset.tool = t.id;
+    card.innerHTML = `
+      <div class="card-top">
+        <div>
+          <div class="card-name">${t.name}</div>
+          <div class="card-maker">${t.maker}</div>
+        </div>
+        <div class="card-stars">${t.stars !== 'N/A' && t.stars !== 'Proprietary' && t.stars !== 'Closed beta' && t.stars !== 'Growing' && t.stars !== 'Various impls' && t.stars !== 'Popular (many forks)' ? '⭐ ' : ''}${t.stars}</div>
+      </div>
+      <div class="card-desc">${t.desc}</div>
+      <div class="card-tags">
+        <span class="ctag ${cls}">${label}</span>
+        <span class="ctag ${t.priceType === 'free' ? 'tag-open' : 'tag-prop'}">${t.price}</span>
+        ${t.agentLock === 'None' || t.agentLock === 'N/A' ? '<span class="ctag tag-free">No lock-in</span>' : ''}
+      </div>
+    `;
+    card.addEventListener('click', () => openPanel(t.id));
+    grid.appendChild(card);
+  });
+}
+
+// ── Panel ──
+function openPanel(id) {
+  const t = TOOLS.find(x => x.id === id);
+  if (!t) return;
+  const [cls, label] = SDD_BADGE[t.sddLevel] || ['sdd-first', t.sddLevel];
+  document.getElementById('panel-title').textContent = t.name;
+  document.getElementById('panel-body').innerHTML = `
+    <div class="detail-kv">
+      <span class="detail-k">Maker</span><span class="detail-v">${t.maker}</span>
+      <span class="detail-k">Stars</span><span class="detail-v" style="color:var(--accent-warn);font-weight:700">${t.stars}</span>
+      <span class="detail-k">SDD Level</span><span class="detail-v"><span class="sdd-badge ${cls}">${label}</span></span>
+      <span class="detail-k">Spec Format</span><span class="detail-v">${t.specFormat}</span>
+      <span class="detail-k">Agent Lock-in</span><span class="detail-v">${t.agentLock}</span>
+      <span class="detail-k">Price</span><span class="detail-v class="${t.priceType === 'free' ? 'price-free' : 'price-paid'}">${t.price}</span>
+      <span class="detail-k">License</span><span class="detail-v">${t.license}</span>
+      <span class="detail-k">Workflow</span><span class="detail-v" style="color:var(--accent-3);font-family:'SFMono-Regular',Consolas,monospace;font-size:12px">${t.workflow || '—'}</span>
+      <span class="detail-k">Install</span><span class="detail-v"><code style="font-size:11px;color:var(--accent-2)">${t.install}</code></span>
+    </div>
+
+    <div class="detail-section">
+      <h4>Spec Example</h4>
+      <pre>${escapeHtml(t.specExample)}</pre>
+    </div>
+
+    <div class="detail-section">
+      <h4>Strengths & Weaknesses</h4>
+      <div class="pros-cons">
+        <div class="pros-box">
+          <strong>✓ Strengths</strong>
+          <ul>${t.strengths.map(s => `<li>${s}</li>`).join('')}</ul>
+        </div>
+        <div class="cons-box">
+          <strong>✗ Weaknesses</strong>
+          <ul>${t.weaknesses.map(s => `<li>${s}</li>`).join('')}</ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <h4>When to Choose</h4>
+      <p style="font-size:13px;color:var(--text-muted)">${t.bestFor}</p>
+    </div>
+
+    <div class="detail-section">
+      <h4>Sources</h4>
+      <ul class="source-list">
+        ${t.links.map(l => `<li><a href="${l.url}" target="_blank">↗ ${l.label}</a></li>`).join('')}
+      </ul>
+    </div>
+  `;
+  document.getElementById('detail-panel').classList.add('open');
+  document.getElementById('overlay').classList.add('open');
+
+  // sidebar highlight
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  const navEl = document.querySelector(`.nav-item[data-tool="${id}"]`);
+  if (navEl) navEl.classList.add('active');
+}
+
+function closePanel() {
+  document.getElementById('detail-panel').classList.remove('open');
+  document.getElementById('overlay').classList.remove('open');
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+}
+
+function escapeHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── Tabs ──
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(`tab-${tab.dataset.tab}`).classList.add('active');
+  });
+});
+
+// ── Filters ──
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+    const f = btn.dataset.filter;
+    let filtered = TOOLS;
+    if (f === 'ai-native') filtered = TOOLS.filter(t => t.category === 'ai-native');
+    else if (f === 'api-first') filtered = TOOLS.filter(t => t.category === 'api-first');
+    else if (f === 'free') filtered = TOOLS.filter(t => t.priceType === 'free');
+    else if (f === 'open') filtered = TOOLS.filter(t => ['MIT','Apache-2.0','Open source','Open source (no paywalls)'].includes(t.license));
+    renderTable(filtered);
+    renderCards(filtered);
+  });
+});
+
+// ── Search ──
+document.getElementById('search').addEventListener('input', e => {
+  const q = e.target.value.toLowerCase();
+  const filtered = q ? TOOLS.filter(t =>
+    t.name.toLowerCase().includes(q) ||
+    t.maker.toLowerCase().includes(q) ||
+    t.bestFor.toLowerCase().includes(q) ||
+    t.desc.toLowerCase().includes(q)
+  ) : TOOLS;
+  renderTable(filtered);
+  renderCards(filtered);
+});
+
+// ── Sidebar nav ──
+document.querySelectorAll('.nav-item').forEach(el => {
+  el.addEventListener('click', e => {
+    e.preventDefault();
+    openPanel(el.dataset.tool);
+  });
+});
+
+// ── Close ──
+document.getElementById('close-btn').addEventListener('click', closePanel);
+document.getElementById('overlay').addEventListener('click', closePanel);
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closePanel(); });
+
+// ── Init ──
+renderTable(TOOLS);
+renderCards(TOOLS);
+</script>
+</body>
+</html>
