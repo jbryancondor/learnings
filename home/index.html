@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bryan's Learning Lab</title>
+  <style>
+    /* ── Dark theme (default) ── */
+    :root {
+      --bg: #0d1117;
+      --bg-card: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --text-muted: #7d8590;
+      --accent: #58a6ff;
+      --accent-2: #3fb950;
+      --tag-bg: #1f2937;
+    }
+
+    /* ── Light theme ── */
+    [data-theme="light"] {
+      --bg: #ffffff;
+      --bg-card: #f6f8fa;
+      --border: #d0d7de;
+      --text: #1f2328;
+      --text-muted: #636c76;
+      --accent: #0969da;
+      --accent-2: #1a7f37;
+      --tag-bg: #eaeef2;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+      min-height: 100vh;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    /* ── Theme toggle ── */
+    #theme-toggle {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 200;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 6px 10px;
+      cursor: pointer;
+      font-size: 16px;
+      color: var(--text);
+      transition: background 0.15s, border-color 0.15s;
+    }
+    #theme-toggle:hover { border-color: var(--accent); }
+
+    /* ── Header ── */
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 48px 40px 40px;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+    header h1 {
+      font-size: 28px;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+    }
+    header h1 span { color: var(--accent); }
+    header p {
+      color: var(--text-muted);
+      font-size: 15px;
+      max-width: 520px;
+    }
+
+    /* ── Main ── */
+    main {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px;
+    }
+    .section-title {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+
+    /* ── Cards ── */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .card:hover { border-color: var(--accent); }
+    .card-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--accent);
+    }
+    .card-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      flex: 1;
+    }
+    .card-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+    .tag {
+      background: var(--tag-bg);
+      color: var(--text-muted);
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+    }
+
+    /* ── Footer ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 24px 40px;
+      max-width: 960px;
+      margin: 40px auto 0;
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+
+  <button id="theme-toggle" aria-label="Toggle light/dark theme" title="Toggle theme">
+    <span id="theme-icon">🌙</span>
+  </button>
+
+  <header>
+    <h1>Bryan's <span>Learning Lab</span></h1>
+    <p>A collection of research, benchmarks, and experiments — each page is an independent deep dive into a concept or tool.</p>
+  </header>
+
+  <main>
+    <div class="section-title">All pages</div>
+    <div class="grid">
+
+      <!-- PAGES_START -->
+      <a class="card" href="../sdd-research/">
+        <div class="card-title">SDD Tools Benchmark — 2026</div>
+        <div class="card-desc">Comparative analysis of Spec-Driven Development tools, frameworks, and methodologies.</div>
+        <div class="card-meta">
+          <span class="tag">research</span>
+          <span class="tag">2026</span>
+        </div>
+      </a>
+      <!-- PAGES_END -->
+
+    </div>
+  </main>
+
+  <footer>
+    jbryancondor/learnings · <a href="https://github.com/jbryancondor/learnings" style="color: var(--accent); text-decoration: none;">github.com/jbryancondor/learnings</a>
+  </footer>
+
+  <script>
+  (function() {
+    const root = document.documentElement;
+    const btn  = document.getElementById('theme-toggle');
+    const icon = document.getElementById('theme-icon');
+    const mq   = window.matchMedia('(prefers-color-scheme: dark)');
+
+    function applyTheme(theme) {
+      root.setAttribute('data-theme', theme);
+      icon.textContent = theme === 'dark' ? '🌙' : '☀️';
+      localStorage.setItem('theme', theme);
+    }
+
+    const stored = localStorage.getItem('theme');
+    applyTheme(stored || (mq.matches ? 'dark' : 'light'));
+
+    mq.addEventListener('change', e => {
+      if (!localStorage.getItem('theme')) applyTheme(e.matches ? 'dark' : 'light');
+    });
+
+    btn.addEventListener('click', () => {
+      applyTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+    });
+  })();
+  </script>
+
+</body>
+</html>

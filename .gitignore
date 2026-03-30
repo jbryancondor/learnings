@@ -1,1 +1,20 @@
-# empty so far
+# ── OS ──
+.DS_Store
+Thumbs.db
+
+# ── Editor ──
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ── Secrets ──
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+
+# ── Claude Code local settings ──
+.claude/settings.local.json
