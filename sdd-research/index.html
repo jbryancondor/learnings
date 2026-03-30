@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -18,9 +18,43 @@
       --accent-3: #d2a8ff;
       --accent-warn: #d29922;
       --accent-danger: #f85149;
+      --accent-bdd: #7ea5ff;
       --tag-bg: #1f2937;
       --sidebar-w: 280px;
     }
+
+    [data-theme="light"] {
+      --bg: #ffffff;
+      --bg-card: #f6f8fa;
+      --bg-code: #f0f2f4;
+      --border: #d0d7de;
+      --text: #1f2328;
+      --text-muted: #636c76;
+      --text-dim: #8c959f;
+      --accent: #0969da;
+      --accent-2: #1a7f37;
+      --accent-3: #8250df;
+      --accent-warn: #9a6700;
+      --accent-danger: #cf222e;
+      --accent-bdd: #4f6bed;
+      --tag-bg: #eaeef2;
+    }
+
+    #theme-toggle {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 200;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 6px 10px;
+      cursor: pointer;
+      font-size: 16px;
+      color: var(--text);
+      transition: background 0.15s, border-color 0.15s;
+    }
+    #theme-toggle:hover { border-color: var(--accent); }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       background: var(--bg);
@@ -29,6 +63,7 @@
       font-size: 14px;
       line-height: 1.6;
       display: flex;
+      transition: background 0.2s, color 0.2s;
     }
 
     /* ── Sidebar ── */
@@ -260,7 +295,7 @@
     .sdd-source { background: rgba(210,169,255,.15); color: var(--accent-3); }
     .sdd-autonomous { background: rgba(248,81,73,.15); color: var(--accent-danger); }
     .sdd-api { background: rgba(210,153,34,.15); color: var(--accent-warn); }
-    .sdd-bdd { background: rgba(126,155,220,.15); color: #7ea5ff; }
+    .sdd-bdd { background: rgba(126,155,220,.15); color: var(--accent-bdd); }
     .price-free { color: var(--accent-2); font-weight: 600; }
     .price-paid { color: var(--accent-warn); font-weight: 600; }
     .lock-none { color: var(--accent-2); }
@@ -410,7 +445,7 @@
       font-size: 12px;
       font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
       line-height: 1.5;
-      color: #e6edf3;
+      color: var(--text);
     }
     code { font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace; }
 
@@ -528,6 +563,10 @@
   </style>
 </head>
 <body>
+
+<button id="theme-toggle" aria-label="Toggle light/dark theme" title="Toggle theme">
+  <span id="theme-icon">🌙</span>
+</button>
 
 <!-- Sidebar -->
 <nav id="sidebar">
@@ -1869,6 +1908,32 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closePanel()
 // ── Init ──
 renderTable(TOOLS);
 renderCards(TOOLS);
+</script>
+
+<script>
+(function() {
+  const root = document.documentElement;
+  const btn  = document.getElementById('theme-toggle');
+  const icon = document.getElementById('theme-icon');
+  const mq   = window.matchMedia('(prefers-color-scheme: dark)');
+
+  function applyTheme(theme) {
+    root.setAttribute('data-theme', theme);
+    icon.textContent = theme === 'dark' ? '🌙' : '☀️';
+    localStorage.setItem('theme', theme);
+  }
+
+  const stored = localStorage.getItem('theme');
+  applyTheme(stored || (mq.matches ? 'dark' : 'light'));
+
+  mq.addEventListener('change', e => {
+    if (!localStorage.getItem('theme')) applyTheme(e.matches ? 'dark' : 'light');
+  });
+
+  btn.addEventListener('click', () => {
+    applyTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+  });
+})();
 </script>
 </body>
 </html>
