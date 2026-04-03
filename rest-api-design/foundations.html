@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Foundational Theory &amp; RFCs — REST API Design</title>
+  <style>
+    :root { --bg:#0d1117;--bg-card:#161b22;--border:#30363d;--text:#e6edf3;--text-muted:#7d8590;--accent:#58a6ff;--accent-2:#3fb950;--tag-bg:#1f2937;--warning:#d29922;--code-bg:#1c2128; }
+    [data-theme="light"] { --bg:#ffffff;--bg-card:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#636c76;--accent:#0969da;--accent-2:#1a7f37;--tag-bg:#eaeef2;--warning:#9a6700;--code-bg:#f0f2f4; }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans',sans-serif;font-size:14px;line-height:1.7;min-height:100vh;transition:background 0.2s,color 0.2s;}
+    #theme-toggle{position:fixed;top:16px;right:16px;z-index:200;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:6px 10px;cursor:pointer;font-size:16px;color:var(--text);}
+    #theme-toggle:hover{border-color:var(--accent);}
+    .page-wrap{max-width:960px;margin:0 auto;padding:0 40px;}
+    header{border-bottom:1px solid var(--border);padding:48px 0 40px;}
+    .back-link{display:inline-block;color:var(--text-muted);text-decoration:none;font-size:13px;margin-bottom:20px;transition:color 0.15s;}
+    .back-link:hover{color:var(--accent);}
+    header h1{font-size:26px;font-weight:700;letter-spacing:-0.5px;margin-bottom:10px;}
+    header h1 span{color:var(--accent);}
+    .section-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:8px;}
+    .section-intro{color:var(--text-muted);font-size:14px;max-width:680px;margin-bottom:28px;}
+    h3{font-size:15px;font-weight:600;margin:24px 0 10px;color:var(--text);}
+    p{margin-bottom:12px;color:var(--text);}
+    .entry{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:20px 24px;margin-bottom:12px;}
+    .entry-header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:10px;flex-wrap:wrap;}
+    .entry-title{font-size:14px;font-weight:600;color:var(--text);}
+    .entry-org{font-size:11px;color:var(--text-muted);white-space:nowrap;}
+    .entry-body{font-size:13px;color:var(--text-muted);line-height:1.65;}
+    .entry-body ul{list-style:none;padding:0;margin-top:6px;}
+    .entry-body ul li{padding:2px 0 2px 16px;position:relative;}
+    .entry-body ul li::before{content:'›';position:absolute;left:0;color:var(--accent);font-weight:700;}
+    .entry-source{margin-top:10px;}
+    .entry-source a{font-size:11px;color:var(--accent-2);text-decoration:none;}
+    .entry-source a:hover{text-decoration:underline;}
+    .table-wrap{overflow-x:auto;margin:16px 0 24px;border-radius:8px;border:1px solid var(--border);}
+    table{width:100%;border-collapse:collapse;font-size:13px;}
+    thead th{background:var(--bg-card);color:var(--text-muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.07em;padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap;}
+    tbody tr:nth-child(even){background:var(--bg-card);}
+    tbody tr:nth-child(odd){background:var(--bg);}
+    tbody td{padding:10px 14px;border-bottom:1px solid var(--border);vertical-align:top;}
+    tbody tr:last-child td{border-bottom:none;}
+    code{background:var(--code-bg);border-radius:4px;padding:1px 5px;font-size:12px;font-family:'SF Mono','Fira Code',monospace;color:var(--accent);}
+    footer{border-top:1px solid var(--border);padding:24px 0;margin-top:20px;color:var(--text-muted);font-size:12px;}
+    footer a{color:var(--accent);text-decoration:none;}
+    footer a:hover{text-decoration:underline;}
+    @media(max-width:600px){.page-wrap{padding:0 20px;}header h1{font-size:20px;}}
+  </style>
+</head>
+<body>
+  <button id="theme-toggle" aria-label="Toggle light/dark theme" title="Toggle theme"><span id="theme-icon">🌙</span></button>
+  <div class="page-wrap">
+    <header>
+      <a class="back-link" href="./">← REST API Design</a>
+      <div class="section-label">Theory</div>
+      <h1>Foundational <span>Theory &amp; RFCs</span></h1>
+    </header>
+    <main>
+      <section>
+        <p class="section-intro">REST is an architectural style derived incrementally by applying constraints to a null-style architecture — from Roy Fielding's 2000 doctoral dissertation. Most APIs labeled "REST" violate at least one constraint. Understanding the theory clarifies what trade-offs you're actually making.</p>
+
+        <div class="entry">
+          <div class="entry-header">
+            <div class="entry-title">Roy Fielding's Dissertation — Chapter 5: REST (2000)</div>
+            <div class="entry-org">Roy Thomas Fielding · UC Irvine</div>
+          </div>
+          <div class="entry-body">
+            <p>REST was designed for the web's architecture, not as a recipe for JSON APIs. Fielding derived it by starting from a "null style" and adding constraints, each providing specific properties. The 6 constraints work as a system — removing any one changes the resulting properties fundamentally.</p>
+          </div>
+          <div class="entry-source">
+            <a href="https://roy.gbiv.com/pubs/dissertation/rest_arch_style.htm" target="_blank" rel="noopener">Fielding's Dissertation — Chapter 5 ↗</a>
+            &nbsp;·&nbsp;
+            <a href="https://twobithistory.org/2020/06/28/rest.html" target="_blank" rel="noopener">Two Bit History — "Misappropriated REST" ↗</a>
+          </div>
+        </div>
+
+        <h3>REST's 6 Architectural Constraints</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Constraint</th><th>What it means</th><th>Benefit</th><th>Trade-off</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Client-Server</strong></td><td>Separate UI concerns from data storage</td><td>Portability + scalability through separation of concerns</td><td>Adds coordination complexity</td></tr>
+              <tr><td><strong>Stateless</strong></td><td>Each request contains all info needed; no server-side session</td><td>Visibility, reliability, scalability — monitoring needs only one request</td><td>Repetitive data in requests; less server control over consistency</td></tr>
+              <tr><td><strong>Cacheable</strong></td><td>Responses declare whether they can be reused</td><td>Reduces latency and network load significantly</td><td>Risk of stale data diverging from server state</td></tr>
+              <tr><td><strong>Uniform Interface</strong></td><td>Standardized interactions: resource IDs, representations, self-descriptive messages, HATEOAS</td><td>Simplifies architecture; improves interaction visibility</td><td>Degrades efficiency — standardized formats aren't optimized per application</td></tr>
+              <tr><td><strong>Layered System</strong></td><td>Components only interact with adjacent layers; clients can't tell if directly connected to server</td><td>Enables load balancers, caches, security gateways, legacy integration</td><td>Adds latency and processing overhead</td></tr>
+              <tr><td><strong>Code on Demand</strong> <em>(optional)</em></td><td>Servers can transfer executable code to extend client functionality</td><td>Reduces features pre-implemented in clients</td><td>Decreases visibility; optional due to trust boundaries</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Fielding's 6 Rules for REST APIs (2008)</h3>
+        <div class="entry">
+          <div class="entry-body">
+            <ul>
+              <li>APIs should not depend on a single communication protocol</li>
+              <li>Must not introduce non-standard protocol elements</li>
+              <li>Primary design effort should go into <strong>media types and relation names</strong>, not URI patterns</li>
+              <li>No fixed URI hierarchies — servers must control their own namespace</li>
+              <li>Resource types are invisible to clients; only media types and relations matter</li>
+              <li>Clients must enter with only an initial URI and standard media types; <strong>all state transitions driven by server-provided choices</strong> (HATEOAS)</li>
+            </ul>
+            <p style="margin-top:10px;">Bottom line from Fielding: <em>"If the engine of application state is not being driven by hypertext, then it cannot be RESTful. Period."</em> Most industry APIs are RPC over HTTP, not REST.</p>
+          </div>
+          <div class="entry-source">
+            <a href="https://roy.gbiv.com/untangled/2008/rest-apis-must-be-hypertext-driven" target="_blank" rel="noopener">Fielding — REST APIs must be hypertext-driven ↗</a>
+          </div>
+        </div>
+
+        <h3>Key RFCs</h3>
+        <div class="entry">
+          <div class="entry-body">
+            <ul>
+              <li><strong>RFC 9110</strong> — HTTP Semantics (2022, supersedes RFC 7231): method definitions, status codes, headers, content negotiation. The authoritative reference for HTTP behavior. Safe methods (GET, HEAD) enable caching; idempotent methods (PUT, DELETE) enable retry safety.</li>
+              <li><strong>RFC 9457</strong> — Problem Details for HTTP APIs (supersedes RFC 7807): standard <code>application/problem+json</code> error format. Fields: <code>type</code> (URI), <code>title</code>, <code>status</code>, <code>detail</code>, <code>instance</code>. Extensible with custom members.</li>
+              <li><strong>RFC 8288</strong> — Web Linking (supersedes RFC 5988): <code>Link</code> header for typed hypermedia relationships. Foundation that HATEOAS implementations (HAL, Siren) build upon. Used by GitHub for pagination (<code>rel="next"</code>, <code>rel="last"</code>).</li>
+              <li><strong>RFC 6585</strong> — Additional HTTP Status Codes: defines <code>429 Too Many Requests</code> with <code>Retry-After</code> header — the standard for rate limiting responses.</li>
+              <li><strong>RFC 6902</strong> — JSON Patch: fine-grained PATCH operations (<code>add</code>, <code>remove</code>, <code>replace</code>, <code>move</code>, <code>copy</code>, <code>test</code>).</li>
+              <li><strong>RFC 7386</strong> — JSON Merge Patch: simpler PATCH format where <code>null</code> means delete a field.</li>
+              <li><strong>RFC 6750</strong> — Bearer Token usage in OAuth 2.0.</li>
+            </ul>
+          </div>
+          <div class="entry-source">
+            <a href="https://datatracker.ietf.org/doc/html/rfc9110" target="_blank" rel="noopener">RFC 9110 ↗</a>
+            &nbsp;·&nbsp;
+            <a href="https://www.rfc-editor.org/rfc/rfc9457.html" target="_blank" rel="noopener">RFC 9457 ↗</a>
+            &nbsp;·&nbsp;
+            <a href="https://httpwg.org/specs/rfc8288.html" target="_blank" rel="noopener">RFC 8288 ↗</a>
+            &nbsp;·&nbsp;
+            <a href="https://www.rfc-editor.org/rfc/rfc6585" target="_blank" rel="noopener">RFC 6585 ↗</a>
+          </div>
+        </div>
+      </section>
+    </main>
+    <footer>
+      <a href="./">← REST API Design</a>
+      &nbsp;·&nbsp;
+      jbryancondor/learnings
+    </footer>
+  </div>
+  <script>
+  (function() {
+    const root = document.documentElement;
+    const btn  = document.getElementById('theme-toggle');
+    const icon = document.getElementById('theme-icon');
+    const mq   = window.matchMedia('(prefers-color-scheme: dark)');
+    function applyTheme(theme) {
+      root.setAttribute('data-theme', theme);
+      icon.textContent = theme === 'dark' ? '🌙' : '☀️';
+      localStorage.setItem('theme', theme);
+    }
+    const stored = localStorage.getItem('theme');
+    applyTheme(stored || (mq.matches ? 'dark' : 'light'));
+    mq.addEventListener('change', function(e) { if (!localStorage.getItem('theme')) applyTheme(e.matches ? 'dark' : 'light'); });
+    btn.addEventListener('click', function() { applyTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'); });
+  })();
+  </script>
+</body>
+</html>

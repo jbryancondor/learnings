@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The N+1 Problem — REST API Design</title>
+  <style>
+    :root { --bg:#0d1117;--bg-card:#161b22;--border:#30363d;--text:#e6edf3;--text-muted:#7d8590;--accent:#58a6ff;--accent-2:#3fb950;--tag-bg:#1f2937;--warning:#d29922;--code-bg:#1c2128; }
+    [data-theme="light"] { --bg:#ffffff;--bg-card:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#636c76;--accent:#0969da;--accent-2:#1a7f37;--tag-bg:#eaeef2;--warning:#9a6700;--code-bg:#f0f2f4; }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans',sans-serif;font-size:14px;line-height:1.7;min-height:100vh;transition:background 0.2s,color 0.2s;}
+    #theme-toggle{position:fixed;top:16px;right:16px;z-index:200;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:6px 10px;cursor:pointer;font-size:16px;color:var(--text);}
+    #theme-toggle:hover{border-color:var(--accent);}
+    .page-wrap{max-width:960px;margin:0 auto;padding:0 40px;}
+    header{border-bottom:1px solid var(--border);padding:48px 0 40px;}
+    .back-link{display:inline-block;color:var(--text-muted);text-decoration:none;font-size:13px;margin-bottom:20px;transition:color 0.15s;}
+    .back-link:hover{color:var(--accent);}
+    header h1{font-size:26px;font-weight:700;letter-spacing:-0.5px;margin-bottom:10px;}
+    header h1 span{color:var(--accent);}
+    .section-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:8px;}
+    .section-intro{color:var(--text-muted);font-size:14px;max-width:680px;margin-bottom:28px;}
+    .table-wrap{overflow-x:auto;margin:16px 0 24px;border-radius:8px;border:1px solid var(--border);}
+    table{width:100%;border-collapse:collapse;font-size:13px;}
+    thead th{background:var(--bg-card);color:var(--text-muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.07em;padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap;}
+    tbody tr:nth-child(even){background:var(--bg-card);}
+    tbody tr:nth-child(odd){background:var(--bg);}
+    tbody td{padding:10px 14px;border-bottom:1px solid var(--border);vertical-align:top;}
+    tbody tr:last-child td{border-bottom:none;}
+    code{background:var(--code-bg);border-radius:4px;padding:1px 5px;font-size:12px;font-family:'SF Mono','Fira Code',monospace;color:var(--accent);}
+    .callout{background:var(--bg-card);border-left:3px solid var(--accent);border-radius:0 6px 6px 0;padding:14px 18px;margin:16px 0;font-size:13px;color:var(--text-muted);}
+    .callout strong{color:var(--text);}
+    footer{border-top:1px solid var(--border);padding:24px 0;margin-top:20px;color:var(--text-muted);font-size:12px;}
+    footer a{color:var(--accent);text-decoration:none;}
+    footer a:hover{text-decoration:underline;}
+    @media(max-width:600px){.page-wrap{padding:0 20px;}header h1{font-size:20px;}}
+  </style>
+</head>
+<body>
+  <button id="theme-toggle" aria-label="Toggle light/dark theme" title="Toggle theme"><span id="theme-icon">🌙</span></button>
+  <div class="page-wrap">
+    <header>
+      <a class="back-link" href="./">← REST API Design</a>
+      <div class="section-label">Pattern</div>
+      <h1>The N+1 <span>Problem</span></h1>
+    </header>
+    <main>
+      <section>
+        <p class="section-intro">Fetching a list of resources then making N additional requests for each item's related data. The most common REST performance anti-pattern.</p>
+
+        <div class="callout">
+          <strong>Example:</strong> <code>GET /orders</code> returns 50 orders → 50 × <code>GET /customers/{id}</code> for each order's customer. Total: 51 requests instead of 1.
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Solution</th><th>Mechanism</th><th>Example</th><th>Used by</th><th>Deduplicates?</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Expandable objects</strong></td>
+                <td>Query param opt-in embedding</td>
+                <td><code>?expand[]=customer</code></td>
+                <td>Stripe, Atlassian</td>
+                <td>No</td>
+              </tr>
+              <tr>
+                <td><strong>Compound documents</strong></td>
+                <td>Sideloaded <code>included</code> array</td>
+                <td><code>?include=comments.author</code></td>
+                <td>JSON:API</td>
+                <td>Yes</td>
+              </tr>
+              <tr>
+                <td><strong>Sparse fieldsets</strong></td>
+                <td>Per-type field filtering</td>
+                <td><code>?fields[articles]=title,body</code></td>
+                <td>JSON:API, Twitter</td>
+                <td>N/A</td>
+              </tr>
+              <tr>
+                <td><strong>Field masks</strong></td>
+                <td>FieldMask proto / query param</td>
+                <td><code>?fields=name,customer.email</code></td>
+                <td>Google APIs</td>
+                <td>N/A</td>
+              </tr>
+              <tr>
+                <td><strong>Embed parameter</strong></td>
+                <td>Custom embed convention</td>
+                <td><code>?embed=customer.name</code></td>
+                <td>Vinay Sahni, WordPress</td>
+                <td>No</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout">
+          <strong>Best practice:</strong> Link by default, embed by exception. Use JSON:API <code>?include=</code> when the same related object appears repeatedly in a list (deduplication matters). Use Stripe's <code>expand[]</code> for single-resource expansion. For extreme N+1 cases across many resource types, consider GraphQL.
+        </div>
+      </section>
+    </main>
+    <footer>
+      <a href="./">← REST API Design</a>
+      &nbsp;·&nbsp;
+      jbryancondor/learnings
+    </footer>
+  </div>
+  <script>
+  (function() {
+    const root = document.documentElement;
+    const btn  = document.getElementById('theme-toggle');
+    const icon = document.getElementById('theme-icon');
+    const mq   = window.matchMedia('(prefers-color-scheme: dark)');
+    function applyTheme(theme) {
+      root.setAttribute('data-theme', theme);
+      icon.textContent = theme === 'dark' ? '🌙' : '☀️';
+      localStorage.setItem('theme', theme);
+    }
+    const stored = localStorage.getItem('theme');
+    applyTheme(stored || (mq.matches ? 'dark' : 'light'));
+    mq.addEventListener('change', function(e) { if (!localStorage.getItem('theme')) applyTheme(e.matches ? 'dark' : 'light'); });
+    btn.addEventListener('click', function() { applyTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'); });
+  })();
+  </script>
+</body>
+</html>

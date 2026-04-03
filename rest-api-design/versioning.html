@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Versioning Strategies — REST API Design</title>
+  <style>
+    :root { --bg:#0d1117;--bg-card:#161b22;--border:#30363d;--text:#e6edf3;--text-muted:#7d8590;--accent:#58a6ff;--accent-2:#3fb950;--tag-bg:#1f2937;--warning:#d29922;--code-bg:#1c2128; }
+    [data-theme="light"] { --bg:#ffffff;--bg-card:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#636c76;--accent:#0969da;--accent-2:#1a7f37;--tag-bg:#eaeef2;--warning:#9a6700;--code-bg:#f0f2f4; }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans',sans-serif;font-size:14px;line-height:1.7;min-height:100vh;transition:background 0.2s,color 0.2s;}
+    #theme-toggle{position:fixed;top:16px;right:16px;z-index:200;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:6px 10px;cursor:pointer;font-size:16px;color:var(--text);}
+    #theme-toggle:hover{border-color:var(--accent);}
+    .page-wrap{max-width:960px;margin:0 auto;padding:0 40px;}
+    header{border-bottom:1px solid var(--border);padding:48px 0 40px;}
+    .back-link{display:inline-block;color:var(--text-muted);text-decoration:none;font-size:13px;margin-bottom:20px;transition:color 0.15s;}
+    .back-link:hover{color:var(--accent);}
+    header h1{font-size:26px;font-weight:700;letter-spacing:-0.5px;margin-bottom:10px;}
+    header h1 span{color:var(--accent);}
+    .section-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:8px;}
+    .section-intro{color:var(--text-muted);font-size:14px;max-width:680px;margin-bottom:28px;}
+    .table-wrap{overflow-x:auto;margin:16px 0 24px;border-radius:8px;border:1px solid var(--border);}
+    table{width:100%;border-collapse:collapse;font-size:13px;}
+    thead th{background:var(--bg-card);color:var(--text-muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.07em;padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap;}
+    tbody tr:nth-child(even){background:var(--bg-card);}
+    tbody tr:nth-child(odd){background:var(--bg);}
+    tbody td{padding:10px 14px;border-bottom:1px solid var(--border);vertical-align:top;}
+    tbody tr:last-child td{border-bottom:none;}
+    code{background:var(--code-bg);border-radius:4px;padding:1px 5px;font-size:12px;font-family:'SF Mono','Fira Code',monospace;color:var(--accent);}
+    .pill{display:inline-block;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;border:1px solid var(--border);white-space:nowrap;}
+    .pill-green{background:rgba(63,185,80,.12);color:var(--accent-2);border-color:var(--accent-2);}
+    .pill-blue{background:rgba(88,166,255,.12);color:var(--accent);border-color:var(--accent);}
+    .pill-yellow{background:rgba(210,153,34,.12);color:var(--warning);border-color:var(--warning);}
+    .callout{background:var(--bg-card);border-left:3px solid var(--accent);border-radius:0 6px 6px 0;padding:14px 18px;margin:16px 0;font-size:13px;color:var(--text-muted);}
+    .callout strong{color:var(--text);}
+    footer{border-top:1px solid var(--border);padding:24px 0;margin-top:20px;color:var(--text-muted);font-size:12px;}
+    footer a{color:var(--accent);text-decoration:none;}
+    footer a:hover{text-decoration:underline;}
+    @media(max-width:600px){.page-wrap{padding:0 20px;}header h1{font-size:20px;}}
+  </style>
+</head>
+<body>
+  <button id="theme-toggle" aria-label="Toggle light/dark theme" title="Toggle theme"><span id="theme-icon">🌙</span></button>
+  <div class="page-wrap">
+    <header>
+      <a class="back-link" href="./">← REST API Design</a>
+      <div class="section-label">Pattern</div>
+      <h1>Versioning <span>Strategies</span></h1>
+    </header>
+    <main>
+      <section>
+        <p class="section-intro">How to evolve an API without breaking existing clients — the most consequential architectural decision you'll make.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Strategy</th><th>Mechanism</th><th>Examples</th><th>Pros</th><th>Cons</th><th>Verdict</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>URL path</strong></td>
+                <td><code>/v1/users</code></td>
+                <td>Google, PayPal, most public APIs</td>
+                <td>Simple, browser-explorable, cache-friendly</td>
+                <td>URL pollution; code duplication across versions</td>
+                <td><span class="pill pill-blue">Common</span></td>
+              </tr>
+              <tr>
+                <td><strong>Header versioning</strong></td>
+                <td><code>API-Version: 2</code></td>
+                <td>Microsoft Azure</td>
+                <td>Clean URLs</td>
+                <td>Hard to test in browser; not cache-friendly without Vary</td>
+                <td><span class="pill pill-yellow">Context-dependent</span></td>
+              </tr>
+              <tr>
+                <td><strong>Query param</strong></td>
+                <td><code>?api-version=2</code></td>
+                <td>Some Microsoft APIs</td>
+                <td>Easy to add</td>
+                <td>Pollutes query string; easy to overlook</td>
+                <td><span class="pill pill-yellow">Avoid</span></td>
+              </tr>
+              <tr>
+                <td><strong>Date-based</strong></td>
+                <td>Version = release date; pinned per account</td>
+                <td>Stripe (<code>2017-05-25</code>), Shopify (<code>2024-04</code>)</td>
+                <td>Incremental upgrades; no major jumps; 100+ changes supported by Stripe</td>
+                <td>Complex version-change module architecture required</td>
+                <td><span class="pill pill-green">Gold standard</span></td>
+              </tr>
+              <tr>
+                <td><strong>Media type</strong></td>
+                <td><code>Accept: application/vnd.api+json;version=2</code></td>
+                <td>Zalando (preferred), GitHub (partial)</td>
+                <td>RESTfully purist; clean URLs</td>
+                <td>Complex for clients; not browser-explorable</td>
+                <td><span class="pill pill-yellow">Niche</span></td>
+              </tr>
+              <tr>
+                <td><strong>No versioning</strong></td>
+                <td>Only backwards-compatible changes forever</td>
+                <td>Zalando (ideal), mature internal APIs</td>
+                <td>Zero client disruption; lowest maintenance</td>
+                <td>Requires extreme discipline; not always possible</td>
+                <td><span class="pill pill-green">Ideal if achievable</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout">
+          <strong>Stripe's insight:</strong> Their version-change module architecture — each breaking change is a self-contained transform — lets them maintain compatibility with every version since 2011 (~100 changes) at fixed maintenance cost. The key: immutable response shapes per version, transformation in middleware.
+        </div>
+      </section>
+    </main>
+    <footer>
+      <a href="./">← REST API Design</a>
+      &nbsp;·&nbsp;
+      jbryancondor/learnings
+    </footer>
+  </div>
+  <script>
+  (function() {
+    const root = document.documentElement;
+    const btn  = document.getElementById('theme-toggle');
+    const icon = document.getElementById('theme-icon');
+    const mq   = window.matchMedia('(prefers-color-scheme: dark)');
+    function applyTheme(theme) {
+      root.setAttribute('data-theme', theme);
+      icon.textContent = theme === 'dark' ? '🌙' : '☀️';
+      localStorage.setItem('theme', theme);
+    }
+    const stored = localStorage.getItem('theme');
+    applyTheme(stored || (mq.matches ? 'dark' : 'light'));
+    mq.addEventListener('change', function(e) { if (!localStorage.getItem('theme')) applyTheme(e.matches ? 'dark' : 'light'); });
+    btn.addEventListener('click', function() { applyTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'); });
+  })();
+  </script>
+</body>
+</html>

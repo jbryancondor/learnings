@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>All Sources — REST API Design</title>
+  <style>
+    :root { --bg:#0d1117;--bg-card:#161b22;--border:#30363d;--text:#e6edf3;--text-muted:#7d8590;--accent:#58a6ff;--accent-2:#3fb950;--tag-bg:#1f2937;--warning:#d29922;--code-bg:#1c2128; }
+    [data-theme="light"] { --bg:#ffffff;--bg-card:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#636c76;--accent:#0969da;--accent-2:#1a7f37;--tag-bg:#eaeef2;--warning:#9a6700;--code-bg:#f0f2f4; }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans',sans-serif;font-size:14px;line-height:1.7;min-height:100vh;transition:background 0.2s,color 0.2s;}
+    #theme-toggle{position:fixed;top:16px;right:16px;z-index:200;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:6px 10px;cursor:pointer;font-size:16px;color:var(--text);}
+    #theme-toggle:hover{border-color:var(--accent);}
+    .page-wrap{max-width:960px;margin:0 auto;padding:0 40px;}
+    header{border-bottom:1px solid var(--border);padding:48px 0 40px;}
+    .back-link{display:inline-block;color:var(--text-muted);text-decoration:none;font-size:13px;margin-bottom:20px;transition:color 0.15s;}
+    .back-link:hover{color:var(--accent);}
+    header h1{font-size:26px;font-weight:700;letter-spacing:-0.5px;margin-bottom:10px;}
+    header h1 span{color:var(--accent);}
+    .section-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:8px;}
+    .section-intro{color:var(--text-muted);font-size:14px;max-width:680px;margin-bottom:28px;}
+    .source-group-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);margin:28px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+    .source-list{list-style:none;padding:0;margin-bottom:8px;}
+    .source-list li{padding:6px 0;border-bottom:1px solid var(--border);font-size:13px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;}
+    .source-list li:last-child{border-bottom:none;}
+    .src-title{color:var(--text);font-weight:500;}
+    .src-sep{color:var(--border);flex-shrink:0;}
+    .source-list a{color:var(--accent);text-decoration:none;font-size:12px;word-break:break-all;}
+    .source-list a:hover{text-decoration:underline;}
+    footer{border-top:1px solid var(--border);padding:24px 0;margin-top:20px;color:var(--text-muted);font-size:12px;}
+    footer a{color:var(--accent);text-decoration:none;}
+    footer a:hover{text-decoration:underline;}
+    @media(max-width:600px){.page-wrap{padding:0 20px;}header h1{font-size:20px;}}
+  </style>
+</head>
+<body>
+  <button id="theme-toggle" aria-label="Toggle light/dark theme" title="Toggle theme"><span id="theme-icon">🌙</span></button>
+  <div class="page-wrap">
+    <header>
+      <a class="back-link" href="./">← REST API Design</a>
+      <div class="section-label">Bibliography</div>
+      <h1>All <span>Sources</span></h1>
+    </header>
+    <main>
+      <section>
+        <p class="section-intro">Every reference cited in this page, organized by category. All URLs verified April 2026.</p>
+
+        <div class="source-group-title">Foundational Theory</div>
+        <ul class="source-list">
+          <li>
+            <span class="src-title">Fielding Dissertation — Chapter 5: REST (2000)</span>
+            <span class="src-sep">·</span>
+            <a href="https://roy.gbiv.com/pubs/dissertation/rest_arch_style.htm" target="_blank" rel="noopener">roy.gbiv.com/pubs/dissertation/rest_arch_style.htm</a>
+          </li>
+          <li>
+            <span class="src-title">REST APIs must be hypertext-driven — Roy Fielding (2008)</span>
+            <span class="src-sep">·</span>
+            <a href="https://roy.gbiv.com/untangled/2008/rest-apis-must-be-hypertext-driven" target="_blank" rel="noopener">roy.gbiv.com/untangled/2008/rest-apis-must-be-hypertext-driven</a>
+          </li>
+          <li>
+            <span class="src-title">Richardson Maturity Model — Martin Fowler</span>
+            <span class="src-sep">·</span>
+            <a href="https://martinfowler.com/articles/richardsonMaturityModel.html" target="_blank" rel="noopener">martinfowler.com/articles/richardsonMaturityModel.html</a>
+          </li>
+          <li>
+            <span class="src-title">Richardson Maturity Model — Wikipedia</span>
+            <span class="src-sep">·</span>
+            <a href="https://en.wikipedia.org/wiki/Richardson_Maturity_Model" target="_blank" rel="noopener">en.wikipedia.org/wiki/Richardson_Maturity_Model</a>
+          </li>
+          <li>
+            <span class="src-title">Roy Fielding's Misappropriated REST Dissertation — Two Bit History</span>
+            <span class="src-sep">·</span>
+            <a href="https://twobithistory.org/2020/06/28/rest.html" target="_blank" rel="noopener">twobithistory.org/2020/06/28/rest.html</a>
+          </li>
+          <li>
+            <span class="src-title">Understanding HATEOAS — Nordic APIs</span>
+            <span class="src-sep">·</span>
+            <a href="https://nordicapis.com/unraveling-the-mystery-understanding-hateoas/" target="_blank" rel="noopener">nordicapis.com/unraveling-the-mystery-understanding-hateoas/</a>
+          </li>
+        </ul>
+
+        <div class="source-group-title">RFCs &amp; Standards</div>
+        <ul class="source-list">
+          <li>
+            <span class="src-title">RFC 9110 — HTTP Semantics</span>
+            <span class="src-sep">·</span>
+            <a href="https://www.rfc-editor.org/rfc/rfc9110" target="_blank" rel="noopener">rfc-editor.org/rfc/rfc9110</a>
+          </li>
+          <li>
+            <span class="src-title">RFC 9457 — Problem Details for HTTP APIs</span>
+            <span class="src-sep">·</span>
+            <a href="https://www.rfc-editor.org/rfc/rfc9457.html" target="_blank" rel="noopener">rfc-editor.org/rfc/rfc9457.html</a>
+          </li>
+          <li>
+            <span class="src-title">RFC 8288 — Web Linking</span>
+            <span class="src-sep">·</span>
+            <a href="https://www.rfc-editor.org/rfc/rfc8288" target="_blank" rel="noopener">rfc-editor.org/rfc/rfc8288</a>
+          </li>
+          <li>
+            <span class="src-title">RFC 6585 — Additional HTTP Status Codes (429)</span>
+            <span class="src-sep">·</span>
+            <a href="https://www.rfc-editor.org/rfc/rfc6585" target="_blank" rel="noopener">rfc-editor.org/rfc/rfc6585</a>
+          </li>
+          <li>
+            <span class="src-title">RFC 6902 — JSON Patch</span>
+            <span class="src-sep">·</span>
+            <a href="https://www.rfc-editor.org/rfc/rfc6902" target="_blank" rel="noopener">rfc-editor.org/rfc/rfc6902</a>
+          </li>
+          <li>
+            <span class="src-title">RFC 7386 — JSON Merge Patch</span>
+            <span class="src-sep">·</span>
+            <a href="https://www.rfc-editor.org/rfc/rfc7386" target="_blank" rel="noopener">rfc-editor.org/rfc/rfc7386</a>
+          </li>
+        </ul>
+
+        <div class="source-group-title">Formal Specifications</div>
+        <ul class="source-list">
+          <li>
+            <span class="src-title">JSON:API v1.1</span>
+            <span class="src-sep">·</span>
+            <a href="https://jsonapi.org/format/" target="_blank" rel="noopener">jsonapi.org/format/</a>
+          </li>
+          <li>
+            <span class="src-title">JSON:API — Fetching Includes</span>
+            <span class="src-sep">·</span>
+            <a href="https://jsonapi.org/format/#fetching-includes" target="_blank" rel="noopener">jsonapi.org/format/#fetching-includes</a>
+          </li>
+          <li>
+            <span class="src-title">JSON:API — Sparse Fieldsets</span>
+            <span class="src-sep">·</span>
+            <a href="https://jsonapi.org/format/#fetching-sparse-fieldsets" target="_blank" rel="noopener">jsonapi.org/format/#fetching-sparse-fieldsets</a>
+          </li>
+          <li>
+            <span class="src-title">HAL Specification</span>
+            <span class="src-sep">·</span>
+            <a href="https://stateless.group/hal_specification.html" target="_blank" rel="noopener">stateless.group/hal_specification.html</a>
+          </li>
+          <li>
+            <span class="src-title">HAL vs HATEOAS — Baeldung</span>
+            <span class="src-sep">·</span>
+            <a href="https://www.baeldung.com/java-hal-vs-hateoas" target="_blank" rel="noopener">baeldung.com/java-hal-vs-hateoas</a>
+          </li>
+          <li>
+            <span class="src-title">OpenAPI Specification 3.1</span>
+            <span class="src-sep">·</span>
+            <a href="https://spec.openapis.org/oas/v3.1.0" target="_blank" rel="noopener">spec.openapis.org/oas/v3.1.0</a>
+          </li>
+          <li>
+            <span class="src-title">Siren — Hypermedia Specification (Kevin Swiber)</span>
+            <span class="src-sep">·</span>
+            <a href="https://github.com/kevinswiber/siren" target="_blank" rel="noopener">github.com/kevinswiber/siren</a>
+          </li>
+          <li>
+            <span class="src-title">Collection+JSON (Mike Amundsen)</span>
+            <span class="src-sep">·</span>
+            <a href="http://amundsen.com/media-types/collection/format/" target="_blank" rel="noopener">amundsen.com/media-types/collection/format/</a>
+          </li>
+          <li>
+            <span class="src-title">On choosing a hypermedia type — Kevin Sookocheff</span>
+            <span class="src-sep">·</span>
+            <a href="https://sookocheff.com/post/api/on-choosing-a-hypermedia-format/" target="_blank" rel="noopener">sookocheff.com/post/api/on-choosing-a-hypermedia-format/</a>
+          </li>
+        </ul>
+
+        <div class="source-group-title">Industry Design Guides</div>
+        <ul class="source-list">
+          <li>
+            <span class="src-title">Google API Design Guide</span>
+            <span class="src-sep">·</span>
+            <a href="https://cloud.google.com/apis/design" target="_blank" rel="noopener">cloud.google.com/apis/design</a>
+          </li>
+          <li>
+            <span class="src-title">Google AIP-121: Resource-Oriented Design</span>
+            <span class="src-sep">·</span>
+            <a href="https://google.aip.dev/121" target="_blank" rel="noopener">google.aip.dev/121</a>
+          </li>
+          <li>
+            <span class="src-title">Google AIP-157: Partial Responses</span>
+            <span class="src-sep">·</span>
+            <a href="https://google.aip.dev/157" target="_blank" rel="noopener">google.aip.dev/157</a>
+          </li>
+          <li>
+            <span class="src-title">Google Cloud Blog — Use Links Not Keys</span>
+            <span class="src-sep">·</span>
+            <a href="https://cloud.google.com/blog/products/application-development/api-design-why-you-should-use-links-not-keys-to-represent-relationships-in-apis" target="_blank" rel="noopener">cloud.google.com/blog/…use-links-not-keys…</a>
+          </li>
+          <li>
+            <span class="src-title">Microsoft REST API Guidelines (GitHub)</span>
+            <span class="src-sep">·</span>
+            <a href="https://github.com/microsoft/api-guidelines" target="_blank" rel="noopener">github.com/microsoft/api-guidelines</a>
+          </li>
+          <li>
+            <span class="src-title">Zalando RESTful API Guidelines</span>
+            <span class="src-sep">·</span>
+            <a href="https://opensource.zalando.com/restful-api-guidelines/" target="_blank" rel="noopener">opensource.zalando.com/restful-api-guidelines/</a>
+          </li>
+          <li>
+            <span class="src-title">Atlassian REST API Design Guidelines</span>
+            <span class="src-sep">·</span>
+            <a href="https://developer.atlassian.com/server/framework/atlassian-sdk/atlassian-rest-api-design-guidelines-version-1/" target="_blank" rel="noopener">developer.atlassian.com/…rest-api-design-guidelines…</a>
+          </li>
+          <li>
+            <span class="src-title">PayPal API Style Guide</span>
+            <span class="src-sep">·</span>
+            <a href="https://github.com/levid-gc/paypal-api-standards/blob/master/api-style-guide.md" target="_blank" rel="noopener">github.com/levid-gc/paypal-api-standards</a>
+          </li>
+        </ul>
+
+        <div class="source-group-title">Real-World APIs</div>
+        <ul class="source-list">
+          <li>
+            <span class="src-title">Stripe API Reference</span>
+            <span class="src-sep">·</span>
+            <a href="https://docs.stripe.com/api" target="_blank" rel="noopener">docs.stripe.com/api</a>
+          </li>
+          <li>
+            <span class="src-title">Stripe — Expanding Responses</span>
+            <span class="src-sep">·</span>
+            <a href="https://docs.stripe.com/expand" target="_blank" rel="noopener">docs.stripe.com/expand</a>
+          </li>
+          <li>
+            <span class="src-title">Stripe — API Versioning</span>
+            <span class="src-sep">·</span>
+            <a href="https://stripe.com/blog/api-versioning" target="_blank" rel="noopener">stripe.com/blog/api-versioning</a>
+          </li>
+          <li>
+            <span class="src-title">Stripe — Idempotency</span>
+            <span class="src-sep">·</span>
+            <a href="https://stripe.com/blog/idempotency" target="_blank" rel="noopener">stripe.com/blog/idempotency</a>
+          </li>
+          <li>
+            <span class="src-title">GitHub REST API — Getting Started</span>
+            <span class="src-sep">·</span>
+            <a href="https://docs.github.com/en/rest/using-the-rest-api/getting-started-with-the-rest-api" target="_blank" rel="noopener">docs.github.com/en/rest/…getting-started…</a>
+          </li>
+          <li>
+            <span class="src-title">WordPress REST API — Linking and Embedding</span>
+            <span class="src-sep">·</span>
+            <a href="https://developer.wordpress.org/rest-api/using-the-rest-api/linking-and-embedding/" target="_blank" rel="noopener">developer.wordpress.org/rest-api/…linking-and-embedding/</a>
+          </li>
+          <li>
+            <span class="src-title">Twitter/X API — Rate Limits</span>
+            <span class="src-sep">·</span>
+            <a href="https://docs.x.com/x-api/fundamentals/rate-limits" target="_blank" rel="noopener">docs.x.com/x-api/fundamentals/rate-limits</a>
+          </li>
+          <li>
+            <span class="src-title">Twilio — 3 Tips to Build Usable APIs</span>
+            <span class="src-sep">·</span>
+            <a href="https://blogs.mulesoft.com/dev-guides/api-design/twilio-3-tips-to-build-usable-apis/" target="_blank" rel="noopener">blogs.mulesoft.com/…twilio-3-tips-to-build-usable-apis/</a>
+          </li>
+          <li>
+            <span class="src-title">Shopify Engineering — GraphQL Design Patterns</span>
+            <span class="src-sep">·</span>
+            <a href="https://shopify.engineering/unifying-graphql-design-patterns-best-practices-tutorials" target="_blank" rel="noopener">shopify.engineering/…graphql-design-patterns…</a>
+          </li>
+        </ul>
+
+        <div class="source-group-title">Pragmatic Guides &amp; Blog Posts</div>
+        <ul class="source-list">
+          <li>
+            <span class="src-title">Best Practices for a Pragmatic RESTful API — Vinay Sahni</span>
+            <span class="src-sep">·</span>
+            <a href="https://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api" target="_blank" rel="noopener">vinaysahni.com/best-practices-for-a-pragmatic-restful-api</a>
+          </li>
+          <li>
+            <span class="src-title">REST API Design: Resource Modeling — Thoughtworks</span>
+            <span class="src-sep">·</span>
+            <a href="https://www.thoughtworks.com/insights/blog/rest-api-design-resource-modeling" target="_blank" rel="noopener">thoughtworks.com/insights/blog/rest-api-design-resource-modeling</a>
+          </li>
+          <li>
+            <span class="src-title">REST Embedding and Linking — Evert Pot</span>
+            <span class="src-sep">·</span>
+            <a href="https://evertpot.com/rest-embedding-hal-http2/" target="_blank" rel="noopener">evertpot.com/rest-embedding-hal-http2/</a>
+          </li>
+          <li>
+            <span class="src-title">N+1 Problem in REST APIs — restfulapi.net</span>
+            <span class="src-sep">·</span>
+            <a href="https://restfulapi.net/rest-api-n-1-problem/" target="_blank" rel="noopener">restfulapi.net/rest-api-n-1-problem/</a>
+          </li>
+          <li>
+            <span class="src-title">JSON:API Sparse Fieldsets — Aten Design Group</span>
+            <span class="src-sep">·</span>
+            <a href="https://atendesigngroup.com/articles/json-api-getting-just-data-you-need-sparse-fieldsets" target="_blank" rel="noopener">atendesigngroup.com/articles/json-api-…sparse-fieldsets</a>
+          </li>
+          <li>
+            <span class="src-title">RFC 9457 Deep Dive — Codecentric</span>
+            <span class="src-sep">·</span>
+            <a href="https://www.codecentric.de/en/knowledge-hub/blog/charge-your-apis-volume-19-understanding-problem-details-for-http-apis-a-deep-dive-into-rfc-7807-and-rfc-9457" target="_blank" rel="noopener">codecentric.de/…rfc-7807-and-rfc-9457</a>
+          </li>
+        </ul>
+
+        <div class="source-group-title">Books</div>
+        <ul class="source-list">
+          <li>
+            <span class="src-title">RESTful Web APIs — Richardson, Amundsen &amp; Ruby (O'Reilly, 2013)</span>
+            <span class="src-sep">·</span>
+            <a href="https://www.oreilly.com/library/view/restful-web-apis/9781449359713/" target="_blank" rel="noopener">oreilly.com/library/view/restful-web-apis/9781449359713/</a>
+          </li>
+          <li>
+            <span class="src-title">REST API Design Rulebook — Mark Massé (O'Reilly, 2011)</span>
+            <span class="src-sep">·</span>
+            <a href="https://www.oreilly.com/library/view/rest-api-design/9781449317904/" target="_blank" rel="noopener">oreilly.com/library/view/rest-api-design/9781449317904/</a>
+          </li>
+          <li>
+            <span class="src-title">RESTful Web Services Cookbook — Subbu Allamaraju (O'Reilly, 2010)</span>
+            <span class="src-sep">·</span>
+            <a href="https://www.oreilly.com/library/view/restful-web-services/9780596809140/" target="_blank" rel="noopener">oreilly.com/library/view/restful-web-services/9780596809140/</a>
+          </li>
+          <li>
+            <span class="src-title">Build APIs You Won't Hate — Phil Sturgeon (2014)</span>
+            <span class="src-sep">·</span>
+            <a href="https://apisyouwonthate.com/books/build-apis-you-wont-hate/" target="_blank" rel="noopener">apisyouwonthate.com/books/build-apis-you-wont-hate/</a>
+          </li>
+          <li>
+            <span class="src-title">Designing Web APIs — Jin, Sahni &amp; Shevat (O'Reilly, 2018)</span>
+            <span class="src-sep">·</span>
+            <a href="https://www.oreilly.com/library/view/designing-web-apis/9781492026914/" target="_blank" rel="noopener">oreilly.com/library/view/designing-web-apis/9781492026914/</a>
+          </li>
+        </ul>
+
+        <div class="source-group-title">Engineering Blog Posts</div>
+        <ul class="source-list">
+          <li>
+            <span class="src-title">Netflix — Federated GraphQL Architecture</span>
+            <span class="src-sep">·</span>
+            <a href="https://www.apollographql.com/blog/redefining-api-strategy-why-netflix-platform-engineering-chose-federated-graphql" target="_blank" rel="noopener">apollographql.com/blog/…netflix-…federated-graphql</a>
+          </li>
+          <li>
+            <span class="src-title">Uber — Edge Gateway Architecture</span>
+            <span class="src-sep">·</span>
+            <a href="https://www.uber.com/en-IN/blog/architecture-api-gateway/" target="_blank" rel="noopener">uber.com/blog/architecture-api-gateway/</a>
+          </li>
+          <li>
+            <span class="src-title">Airbnb — Building Services at Airbnb</span>
+            <span class="src-sep">·</span>
+            <a href="https://medium.com/airbnb-engineering/building-services-at-airbnb-part-1-c4c1d8fa811b" target="_blank" rel="noopener">medium.com/airbnb-engineering/building-services-at-airbnb-part-1…</a>
+          </li>
+        </ul>
+      </section>
+    </main>
+    <footer>
+      <a href="./">← REST API Design</a>
+      &nbsp;·&nbsp;
+      jbryancondor/learnings
+    </footer>
+  </div>
+  <script>
+  (function() {
+    const root = document.documentElement;
+    const btn  = document.getElementById('theme-toggle');
+    const icon = document.getElementById('theme-icon');
+    const mq   = window.matchMedia('(prefers-color-scheme: dark)');
+    function applyTheme(theme) {
+      root.setAttribute('data-theme', theme);
+      icon.textContent = theme === 'dark' ? '🌙' : '☀️';
+      localStorage.setItem('theme', theme);
+    }
+    const stored = localStorage.getItem('theme');
+    applyTheme(stored || (mq.matches ? 'dark' : 'light'));
+    mq.addEventListener('change', function(e) { if (!localStorage.getItem('theme')) applyTheme(e.matches ? 'dark' : 'light'); });
+    btn.addEventListener('click', function() { applyTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'); });
+  })();
+  </script>
+</body>
+</html>

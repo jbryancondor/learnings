@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Richardson Maturity Model — REST API Design</title>
+  <style>
+    :root { --bg:#0d1117;--bg-card:#161b22;--border:#30363d;--text:#e6edf3;--text-muted:#7d8590;--accent:#58a6ff;--accent-2:#3fb950;--tag-bg:#1f2937;--warning:#d29922;--warning-bg:#161005;--code-bg:#1c2128; }
+    [data-theme="light"] { --bg:#ffffff;--bg-card:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#636c76;--accent:#0969da;--accent-2:#1a7f37;--tag-bg:#eaeef2;--warning:#9a6700;--warning-bg:#fff8c5;--code-bg:#f0f2f4; }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans',sans-serif;font-size:14px;line-height:1.7;min-height:100vh;transition:background 0.2s,color 0.2s;}
+    #theme-toggle{position:fixed;top:16px;right:16px;z-index:200;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:6px 10px;cursor:pointer;font-size:16px;color:var(--text);transition:background 0.15s,border-color 0.15s;}
+    #theme-toggle:hover{border-color:var(--accent);}
+    .page-wrap{max-width:960px;margin:0 auto;padding:0 40px;}
+    header{border-bottom:1px solid var(--border);padding:48px 0 40px;}
+    .back-link{display:inline-block;color:var(--text-muted);text-decoration:none;font-size:13px;margin-bottom:20px;transition:color 0.15s;}
+    .back-link:hover{color:var(--accent);}
+    header h1{font-size:26px;font-weight:700;letter-spacing:-0.5px;margin-bottom:10px;}
+    header h1 span{color:var(--accent);}
+    .section-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:8px;}
+    h2{font-size:20px;font-weight:700;margin-bottom:6px;letter-spacing:-0.3px;}
+    h2 .accent{color:var(--accent);}
+    .section-intro{color:var(--text-muted);font-size:14px;max-width:680px;margin-bottom:28px;}
+    h3{font-size:15px;font-weight:600;margin:24px 0 10px;color:var(--text);}
+    h3:first-of-type{margin-top:0;}
+    p{margin-bottom:12px;color:var(--text);}
+    .entry{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:20px 24px;margin-bottom:12px;}
+    .entry-header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:10px;flex-wrap:wrap;}
+    .entry-title{font-size:14px;font-weight:600;color:var(--text);}
+    .entry-body{font-size:13px;color:var(--text-muted);line-height:1.65;}
+    .entry-body ul{list-style:none;padding:0;margin-top:6px;}
+    .entry-body ul li{padding:2px 0 2px 16px;position:relative;}
+    .entry-body ul li::before{content:'›';position:absolute;left:0;color:var(--accent);font-weight:700;}
+    .entry-source{margin-top:10px;}
+    .entry-source a{font-size:11px;color:var(--accent-2);text-decoration:none;}
+    .entry-source a:hover{text-decoration:underline;}
+    pre{background:var(--code-bg);border:1px solid var(--border);border-radius:6px;padding:14px 16px;overflow-x:auto;font-size:12px;line-height:1.6;margin:10px 0 18px;font-family:'SF Mono','Fira Code','Cascadia Code',monospace;color:var(--text);}
+    code{background:var(--code-bg);border-radius:4px;padding:1px 5px;font-size:12px;font-family:'SF Mono','Fira Code','Cascadia Code',monospace;color:var(--accent);}
+    .callout{background:var(--bg-card);border-left:3px solid var(--accent);border-radius:0 6px 6px 0;padding:14px 18px;margin:16px 0;font-size:13px;color:var(--text-muted);}
+    .callout strong{color:var(--text);}
+    .pill{display:inline-block;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;border:1px solid var(--border);white-space:nowrap;}
+    .pill-green{background:rgba(63,185,80,.12);color:var(--accent-2);border-color:var(--accent-2);}
+    .pill-blue{background:rgba(88,166,255,.12);color:var(--accent);border-color:var(--accent);}
+    .pill-yellow{background:rgba(210,153,34,.12);color:var(--warning);border-color:var(--warning);}
+    footer{border-top:1px solid var(--border);padding:24px 0;margin-top:20px;color:var(--text-muted);font-size:12px;}
+    footer a{color:var(--accent);text-decoration:none;}
+    footer a:hover{text-decoration:underline;}
+    @media(max-width:600px){.page-wrap{padding:0 20px;}header h1{font-size:20px;}}
+  </style>
+</head>
+<body>
+  <button id="theme-toggle" aria-label="Toggle light/dark theme" title="Toggle theme"><span id="theme-icon">🌙</span></button>
+  <div class="page-wrap">
+    <header>
+      <a class="back-link" href="./">← REST API Design</a>
+      <div class="section-label">Maturity Levels</div>
+      <h1>Richardson <span>Maturity Model</span></h1>
+    </header>
+    <main>
+      <section>
+        <p class="section-intro">Introduced by Leonard Richardson, codified by Martin Fowler — a 4-level framework to measure how REST-like an HTTP API is.</p>
+
+        <div class="callout">
+          <strong>Key insight:</strong> Most production APIs operate at Level 2 (HTTP verbs + proper status codes). Level 3 (HATEOAS) is the theoretical ideal but rarely implemented in practice. Roy Fielding argues that without HATEOAS, an API is not truly REST.
+        </div>
+
+        <div class="entry">
+          <div class="entry-header">
+            <div class="entry-title">Level 0 — The Swamp of POX (Plain Old XML)</div>
+            <span class="pill pill-yellow">Avoid</span>
+          </div>
+          <div class="entry-body">
+            <p>A single URI, a single HTTP method (usually POST), with different operations encoded in the request body. Classic SOAP/RPC style — HTTP is used purely as a transport.</p>
+            <pre>POST /appointmentService
+{ "action": "getSlots", "date": "2026-01-01" }
+
+POST /appointmentService
+{ "action": "bookSlot", "doctor": "dr-smith", "slot": "1400" }</pre>
+          </div>
+          <div class="entry-source">
+            <a href="https://martinfowler.com/articles/richardsonMaturityModel.html" target="_blank" rel="noopener">Martin Fowler — Richardson Maturity Model ↗</a>
+          </div>
+        </div>
+
+        <div class="entry">
+          <div class="entry-header">
+            <div class="entry-title">Level 1 — Resources</div>
+            <span class="pill pill-yellow">Minimal</span>
+          </div>
+          <div class="entry-body">
+            <p>Multiple URIs identifying individual resources. Still uses POST for everything, but at least different things have different addresses.</p>
+            <pre>POST /doctors/dr-smith           → get available slots
+POST /slots/1234                 → book a specific slot</pre>
+          </div>
+          <div class="entry-source">
+            <a href="https://martinfowler.com/articles/richardsonMaturityModel.html" target="_blank" rel="noopener">Martin Fowler — Richardson Maturity Model ↗</a>
+          </div>
+        </div>
+
+        <div class="entry">
+          <div class="entry-header">
+            <div class="entry-title">Level 2 — HTTP Verbs</div>
+            <span class="pill pill-blue">Industry Standard</span>
+          </div>
+          <div class="entry-body">
+            <p>Resources + correct HTTP methods (GET, POST, PUT, PATCH, DELETE) + meaningful status codes. This is where the vast majority of production APIs sit — including Stripe, GitHub, and most public APIs.</p>
+            <pre>GET  /doctors/dr-smith/slots?date=2026-01-01   → 200 OK, list slots
+POST /slots                                    → 201 Created, book slot
+DELETE /slots/1234                             → 204 No Content</pre>
+            <ul>
+              <li>GET is safe and idempotent — cacheable by proxies</li>
+              <li>POST creates; PUT/PATCH updates; DELETE removes</li>
+              <li>Correct status codes: 201 on create, 404 on not found, 409 on conflict</li>
+            </ul>
+          </div>
+          <div class="entry-source">
+            <a href="https://martinfowler.com/articles/richardsonMaturityModel.html" target="_blank" rel="noopener">Martin Fowler — Richardson Maturity Model ↗</a>
+            &nbsp;·&nbsp;
+            <a href="https://en.wikipedia.org/wiki/Richardson_Maturity_Model" target="_blank" rel="noopener">Wikipedia ↗</a>
+          </div>
+        </div>
+
+        <div class="entry">
+          <div class="entry-header">
+            <div class="entry-title">Level 3 — HATEOAS (Hypermedia Controls)</div>
+            <span class="pill pill-green">True REST</span>
+          </div>
+          <div class="entry-body">
+            <p>Responses include hypermedia links that tell the client what actions are possible next. The client only needs to know the entry point — it discovers everything else at runtime. Roy Fielding's position: <em>"If the engine of application state is not being driven by hypertext, then it cannot be RESTful."</em></p>
+            <pre>{
+  "slot": { "id": "1234", "time": "14:00", "status": "available" },
+  "_links": {
+    "self":   { "href": "/slots/1234" },
+    "book":   { "href": "/slots/1234/bookings", "method": "POST" },
+    "doctor": { "href": "/doctors/dr-smith" }
+  }
+}</pre>
+            <ul>
+              <li>Clients are decoupled from URL structure — URLs can change without breaking clients</li>
+              <li>Enables API evolution without client rewrites</li>
+              <li>New capabilities advertised in responses — self-documenting</li>
+              <li>Most APIs stop at Level 2 for the reasons below</li>
+            </ul>
+            <p style="margin-top:12px;font-weight:600;color:var(--text);">Why most production APIs don't implement HATEOAS:</p>
+            <ul>
+              <li><strong>Tooling gap:</strong> very few libraries exist to build or consume HATEOAS APIs properly</li>
+              <li><strong>Client behavior:</strong> most consumers (mobile apps, SPAs) hardcode endpoints anyway — decoupling is theoretical</li>
+              <li><strong>Payload bloat:</strong> HATEOAS URIs add significant response size</li>
+              <li><strong>Compatibility:</strong> retrofitting onto existing APIs breaks hardcoded clients</li>
+              <li><strong>Learning curve:</strong> team members need significant training to use link traversal correctly</li>
+              <li><strong>The fundamental paradox:</strong> if clients hardcode behavior regardless, the decoupling benefit doesn't materialize</li>
+            </ul>
+            <p style="margin-top:10px;"><strong>When HATEOAS is worth it:</strong> closed ecosystems where both client and server are controlled; APIs designed for long-term evolution with many diverse consumers who can genuinely adopt dynamic link traversal.</p>
+          </div>
+          <div class="entry-source">
+            <a href="https://roy.gbiv.com/untangled/2008/rest-apis-must-be-hypertext-driven" target="_blank" rel="noopener">Roy Fielding — REST APIs must be hypertext-driven ↗</a>
+            &nbsp;·&nbsp;
+            <a href="https://martinfowler.com/articles/richardsonMaturityModel.html" target="_blank" rel="noopener">Martin Fowler ↗</a>
+            &nbsp;·&nbsp;
+            <a href="https://nordicapis.com/unraveling-the-mystery-understanding-hateoas/" target="_blank" rel="noopener">Nordic APIs — Understanding HATEOAS ↗</a>
+          </div>
+        </div>
+      </section>
+    </main>
+    <footer>
+      <a href="./">← REST API Design</a>
+      &nbsp;·&nbsp;
+      jbryancondor/learnings
+    </footer>
+  </div>
+  <script>
+  (function() {
+    const root = document.documentElement;
+    const btn  = document.getElementById('theme-toggle');
+    const icon = document.getElementById('theme-icon');
+    const mq   = window.matchMedia('(prefers-color-scheme: dark)');
+    function applyTheme(theme) {
+      root.setAttribute('data-theme', theme);
+      icon.textContent = theme === 'dark' ? '🌙' : '☀️';
+      localStorage.setItem('theme', theme);
+    }
+    const stored = localStorage.getItem('theme');
+    applyTheme(stored || (mq.matches ? 'dark' : 'light'));
+    mq.addEventListener('change', function(e) {
+      if (!localStorage.getItem('theme')) applyTheme(e.matches ? 'dark' : 'light');
+    });
+    btn.addEventListener('click', function() {
+      applyTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+    });
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Formal Specifications — REST API Design</title>
+  <style>
+    :root { --bg:#0d1117;--bg-card:#161b22;--border:#30363d;--text:#e6edf3;--text-muted:#7d8590;--accent:#58a6ff;--accent-2:#3fb950;--tag-bg:#1f2937;--warning:#d29922;--code-bg:#1c2128; }
+    [data-theme="light"] { --bg:#ffffff;--bg-card:#f6f8fa;--border:#d0d7de;--text:#1f2328;--text-muted:#636c76;--accent:#0969da;--accent-2:#1a7f37;--tag-bg:#eaeef2;--warning:#9a6700;--code-bg:#f0f2f4; }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans',sans-serif;font-size:14px;line-height:1.7;min-height:100vh;transition:background 0.2s,color 0.2s;}
+    #theme-toggle{position:fixed;top:16px;right:16px;z-index:200;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:6px 10px;cursor:pointer;font-size:16px;color:var(--text);}
+    #theme-toggle:hover{border-color:var(--accent);}
+    .page-wrap{max-width:960px;margin:0 auto;padding:0 40px;}
+    header{border-bottom:1px solid var(--border);padding:48px 0 40px;}
+    .back-link{display:inline-block;color:var(--text-muted);text-decoration:none;font-size:13px;margin-bottom:20px;transition:color 0.15s;}
+    .back-link:hover{color:var(--accent);}
+    header h1{font-size:26px;font-weight:700;letter-spacing:-0.5px;margin-bottom:10px;}
+    header h1 span{color:var(--accent);}
+    .section-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:8px;}
+    .section-intro{color:var(--text-muted);font-size:14px;max-width:680px;margin-bottom:28px;}
+    h3{font-size:15px;font-weight:600;margin:24px 0 10px;color:var(--text);}
+    .card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-bottom:20px;}
+    .card{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:18px 20px;display:flex;flex-direction:column;gap:8px;transition:border-color 0.15s;}
+    .card:hover{border-color:var(--accent);}
+    .card-title{font-size:14px;font-weight:600;color:var(--accent);}
+    .card-org{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;}
+    .card-body{font-size:13px;color:var(--text-muted);line-height:1.6;flex:1;}
+    .card-body ul{list-style:none;padding:0;}
+    .card-body ul li{padding:2px 0 2px 14px;position:relative;}
+    .card-body ul li::before{content:'·';position:absolute;left:0;color:var(--accent);}
+    .card-footer{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:4px;}
+    .card a.source-link{font-size:11px;color:var(--accent-2);text-decoration:none;}
+    .card a.source-link:hover{text-decoration:underline;}
+    .table-wrap{overflow-x:auto;margin:16px 0 24px;border-radius:8px;border:1px solid var(--border);}
+    table{width:100%;border-collapse:collapse;font-size:13px;}
+    thead th{background:var(--bg-card);color:var(--text-muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.07em;padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap;}
+    tbody tr:nth-child(even){background:var(--bg-card);}
+    tbody tr:nth-child(odd){background:var(--bg);}
+    tbody td{padding:10px 14px;border-bottom:1px solid var(--border);vertical-align:top;}
+    tbody tr:last-child td{border-bottom:none;}
+    code{background:var(--code-bg);border-radius:4px;padding:1px 5px;font-size:12px;font-family:'SF Mono','Fira Code',monospace;color:var(--accent);}
+    .entry-source{margin-top:10px;}
+    .entry-source a{font-size:11px;color:var(--accent-2);text-decoration:none;}
+    .entry-source a:hover{text-decoration:underline;}
+    footer{border-top:1px solid var(--border);padding:24px 0;margin-top:20px;color:var(--text-muted);font-size:12px;}
+    footer a{color:var(--accent);text-decoration:none;}
+    footer a:hover{text-decoration:underline;}
+    @media(max-width:600px){.page-wrap{padding:0 20px;}header h1{font-size:20px;}.card-grid{grid-template-columns:1fr;}}
+  </style>
+</head>
+<body>
+  <button id="theme-toggle" aria-label="Toggle light/dark theme" title="Toggle theme"><span id="theme-icon">🌙</span></button>
+  <div class="page-wrap">
+    <header>
+      <a class="back-link" href="./">← REST API Design</a>
+      <div class="section-label">Specifications</div>
+      <h1>Formal <span>Specifications</span></h1>
+    </header>
+    <main>
+      <section>
+        <p class="section-intro">Standards that define how REST responses should be structured — especially for related resources, hypermedia, and compound documents.</p>
+
+        <div class="card-grid">
+          <div class="card">
+            <div class="card-org">JSON:API</div>
+            <div class="card-title">JSON:API v1.1</div>
+            <div class="card-body">
+              <ul>
+                <li>Compound documents with a single <code>included</code> array (deduplicates related objects)</li>
+                <li><code>relationships</code> section: type + id by default; embed via <code>?include=</code></li>
+                <li>Sparse fieldsets: <code>?fields[articles]=title,body</code></li>
+                <li>Best for APIs returning lists with many repeated related objects</li>
+              </ul>
+            </div>
+            <div class="card-footer">
+              <a class="source-link" href="https://jsonapi.org/format/" target="_blank" rel="noopener">jsonapi.org/format ↗</a>
+              &nbsp;·&nbsp;
+              <a class="source-link" href="https://jsonapi.org/format/#fetching-includes" target="_blank" rel="noopener">Fetching includes ↗</a>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-org">HAL</div>
+            <div class="card-title">HAL — Hyperlink Application Language</div>
+            <div class="card-body">
+              <ul>
+                <li><code>_links</code>: hypermedia references (always present)</li>
+                <li><code>_embedded</code>: opt-in inline data (server-controlled)</li>
+                <li>No deduplication — embedded objects may repeat</li>
+                <li>Best for hypermedia-first APIs committed to HATEOAS</li>
+              </ul>
+            </div>
+            <div class="card-footer">
+              <a class="source-link" href="https://stateless.group/hal_specification.html" target="_blank" rel="noopener">HAL Specification ↗</a>
+              &nbsp;·&nbsp;
+              <a class="source-link" href="https://www.baeldung.com/java-hal-vs-hateoas" target="_blank" rel="noopener">HAL vs HATEOAS ↗</a>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-org">OpenAPI Initiative</div>
+            <div class="card-title">OpenAPI Specification (OAS) 3.1</div>
+            <div class="card-body">
+              <ul>
+                <li>Machine-readable API description format (YAML/JSON)</li>
+                <li>Defines endpoints, request/response schemas, authentication, examples</li>
+                <li>Enables: code generation, docs, mocking, testing, SDK generation</li>
+                <li>Backed by Zalando, Microsoft, Google, Stripe, and most major API providers</li>
+              </ul>
+            </div>
+            <div class="card-footer">
+              <a class="source-link" href="https://spec.openapis.org/oas/v3.1.0" target="_blank" rel="noopener">OAS 3.1 Spec ↗</a>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-org">Google Protobuf / gRPC</div>
+            <div class="card-title">Protocol Buffers + AIP Standards</div>
+            <div class="card-body">
+              <ul>
+                <li>Google's internal API standard; many AIPs apply to REST too</li>
+                <li>FieldMask for partial responses (maps to <code>?fields=</code> in REST)</li>
+                <li>Resource names as full URL paths (not bare IDs)</li>
+                <li>Standard methods: Get, List, Create, Update (PATCH), Delete</li>
+              </ul>
+            </div>
+            <div class="card-footer">
+              <a class="source-link" href="https://google.aip.dev/121" target="_blank" rel="noopener">AIP-121 ↗</a>
+              &nbsp;·&nbsp;
+              <a class="source-link" href="https://google.aip.dev/157" target="_blank" rel="noopener">AIP-157 ↗</a>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-org">Kevin Swiber</div>
+            <div class="card-title">Siren — Hypermedia with Actions</div>
+            <div class="card-body">
+              <ul>
+                <li>Addresses HAL's gap: adds explicit <strong>actions</strong> (HTTP method, URL, fields)</li>
+                <li>Supports task-based non-CRUD interfaces</li>
+                <li>Entities with <code>class</code>, <code>properties</code>, <code>actions</code>, sub-entities</li>
+                <li>Full H-Factor coverage</li>
+              </ul>
+            </div>
+            <div class="card-footer">
+              <a class="source-link" href="https://github.com/kevinswiber/siren" target="_blank" rel="noopener">Siren spec (GitHub) ↗</a>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-org">Mike Amundsen</div>
+            <div class="card-title">Collection+JSON</div>
+            <div class="card-body">
+              <ul>
+                <li>Designed for read/write collection management</li>
+                <li>Templates for client data submission (write operations)</li>
+                <li>Queries property for predefined search parameters</li>
+                <li>Inspired by Atom (RFC 4287) and AtomPub (RFC 5023)</li>
+              </ul>
+            </div>
+            <div class="card-footer">
+              <a class="source-link" href="http://amundsen.com/media-types/collection/format/" target="_blank" rel="noopener">Collection+JSON spec ↗</a>
+            </div>
+          </div>
+        </div>
+
+        <h3>Hypermedia format — when to use which</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Scenario</th><th>Recommended</th><th>Reason</th></tr></thead>
+            <tbody>
+              <tr><td>Augmenting an existing API</td><td>JSON-LD</td><td>Semantic overlay without breaking changes</td></tr>
+              <tr><td>Keep it simple</td><td>HAL</td><td>Minimal footprint, wide tooling support</td></tr>
+              <tr><td>Collections with write operations</td><td>Collection+JSON</td><td>Built-in template/query/write semantics</td></tr>
+              <tr><td>Need explicit actions (non-CRUD)</td><td>Siren</td><td>Only format with action + field definitions</td></tr>
+              <tr><td>Broadest tooling &amp; client support</td><td>JSON:API</td><td>Most libraries, validators, and client generators</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="entry-source" style="margin-top:4px;">
+          <a href="https://sookocheff.com/post/api/on-choosing-a-hypermedia-format/" target="_blank" rel="noopener">Kevin Sookocheff — On choosing a hypermedia type ↗</a>
+        </div>
+      </section>
+    </main>
+    <footer>
+      <a href="./">← REST API Design</a>
+      &nbsp;·&nbsp;
+      jbryancondor/learnings
+    </footer>
+  </div>
+  <script>
+  (function() {
+    const root = document.documentElement;
+    const btn  = document.getElementById('theme-toggle');
+    const icon = document.getElementById('theme-icon');
+    const mq   = window.matchMedia('(prefers-color-scheme: dark)');
+    function applyTheme(theme) {
+      root.setAttribute('data-theme', theme);
+      icon.textContent = theme === 'dark' ? '🌙' : '☀️';
+      localStorage.setItem('theme', theme);
+    }
+    const stored = localStorage.getItem('theme');
+    applyTheme(stored || (mq.matches ? 'dark' : 'light'));
+    mq.addEventListener('change', function(e) { if (!localStorage.getItem('theme')) applyTheme(e.matches ? 'dark' : 'light'); });
+    btn.addEventListener('click', function() { applyTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'); });
+  })();
+  </script>
+</body>
+</html>
