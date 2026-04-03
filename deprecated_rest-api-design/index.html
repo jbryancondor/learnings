@@ -1,0 +1,2390 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>REST API Design — Best Practices & Benchmark 2026</title>
+  <style>
+    /* ── Dark theme (default) ── */
+    :root {
+      --bg: #0d1117;
+      --bg-card: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --text-muted: #7d8590;
+      --accent: #58a6ff;
+      --accent-2: #3fb950;
+      --tag-bg: #1f2937;
+      --warning: #d29922;
+      --warning-bg: #161005;
+      --code-bg: #1c2128;
+    }
+
+    /* ── Light theme ── */
+    [data-theme="light"] {
+      --bg: #ffffff;
+      --bg-card: #f6f8fa;
+      --border: #d0d7de;
+      --text: #1f2328;
+      --text-muted: #636c76;
+      --accent: #0969da;
+      --accent-2: #1a7f37;
+      --tag-bg: #eaeef2;
+      --warning: #9a6700;
+      --warning-bg: #fff8c5;
+      --code-bg: #f0f2f4;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', sans-serif;
+      font-size: 14px;
+      line-height: 1.7;
+      min-height: 100vh;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    /* ── Theme toggle ── */
+    #theme-toggle {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 200;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 6px 10px;
+      cursor: pointer;
+      font-size: 16px;
+      color: var(--text);
+      transition: background 0.15s, border-color 0.15s;
+    }
+    #theme-toggle:hover { border-color: var(--accent); }
+
+    /* ── Layout ── */
+    .page-wrap {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 40px;
+    }
+
+    /* ── Header ── */
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 48px 0 40px;
+    }
+    .back-link {
+      display: inline-block;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 13px;
+      margin-bottom: 20px;
+      transition: color 0.15s;
+    }
+    .back-link:hover { color: var(--accent); }
+    header h1 {
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 10px;
+    }
+    header h1 span { color: var(--accent); }
+    .header-meta {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .badge {
+      background: var(--tag-bg);
+      color: var(--text-muted);
+      font-size: 11px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+    }
+    header p {
+      color: var(--text-muted);
+      font-size: 15px;
+      max-width: 620px;
+    }
+
+    /* ── Nav (section jumps) ── */
+    .toc {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px 24px;
+      margin: 32px 0;
+    }
+    .toc-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+    .toc-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 6px 20px;
+      list-style: none;
+    }
+    .toc-list li a {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 13px;
+    }
+    .toc-list li a:hover { text-decoration: underline; }
+
+    /* ── Section ── */
+    section {
+      border-top: 1px solid var(--border);
+      padding: 44px 0;
+    }
+    section:first-of-type { border-top: none; }
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+    h2 {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      letter-spacing: -0.3px;
+    }
+    h2 .accent { color: var(--accent); }
+    .section-intro {
+      color: var(--text-muted);
+      font-size: 14px;
+      max-width: 680px;
+      margin-bottom: 28px;
+    }
+    h3 {
+      font-size: 15px;
+      font-weight: 600;
+      margin: 24px 0 10px;
+      color: var(--text);
+    }
+    h3:first-of-type { margin-top: 0; }
+    p { margin-bottom: 12px; color: var(--text); }
+
+    /* ── Cards ── */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: border-color 0.15s;
+    }
+    .card:hover { border-color: var(--accent); }
+    .card-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--accent);
+    }
+    .card-org {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .card-body {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      flex: 1;
+    }
+    .card-body ul {
+      list-style: none;
+      padding: 0;
+    }
+    .card-body ul li {
+      padding: 2px 0 2px 14px;
+      position: relative;
+    }
+    .card-body ul li::before {
+      content: '·';
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+    }
+    .card-footer {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-top: 4px;
+    }
+    .card a.source-link {
+      font-size: 11px;
+      color: var(--accent-2);
+      text-decoration: none;
+    }
+    .card a.source-link:hover { text-decoration: underline; }
+
+    /* ── Full-width card / entry ── */
+    .entry {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px 24px;
+      margin-bottom: 12px;
+    }
+    .entry-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+    .entry-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .entry-org {
+      font-size: 11px;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+    .entry-body {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.65;
+    }
+    .entry-body ul {
+      list-style: none;
+      padding: 0;
+      margin-top: 6px;
+    }
+    .entry-body ul li {
+      padding: 2px 0 2px 16px;
+      position: relative;
+    }
+    .entry-body ul li::before {
+      content: '›';
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+      font-weight: 700;
+    }
+    .entry-source {
+      margin-top: 10px;
+    }
+    .entry-source a {
+      font-size: 11px;
+      color: var(--accent-2);
+      text-decoration: none;
+    }
+    .entry-source a:hover { text-decoration: underline; }
+
+    /* ── Tables ── */
+    .table-wrap {
+      overflow-x: auto;
+      margin: 16px 0 24px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    thead th {
+      background: var(--bg-card);
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      padding: 10px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    tbody tr:nth-child(even) { background: var(--bg-card); }
+    tbody tr:nth-child(odd) { background: var(--bg); }
+    tbody td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    tbody tr:last-child td { border-bottom: none; }
+    td a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+    td a:hover { text-decoration: underline; }
+    .pill {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    .pill-green { background: rgba(63,185,80,0.12); color: var(--accent-2); border-color: var(--accent-2); }
+    .pill-blue  { background: rgba(88,166,255,0.12); color: var(--accent); border-color: var(--accent); }
+    .pill-yellow{ background: rgba(210,153,34,0.12); color: var(--warning); border-color: var(--warning); }
+
+    /* ── Code block ── */
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 14px 16px;
+      overflow-x: auto;
+      font-size: 12px;
+      line-height: 1.6;
+      margin: 10px 0 18px;
+      font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+      color: var(--text);
+    }
+    code {
+      background: var(--code-bg);
+      border-radius: 4px;
+      padding: 1px 5px;
+      font-size: 12px;
+      font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+      color: var(--accent);
+    }
+
+    /* ── Callout ── */
+    .callout {
+      background: var(--bg-card);
+      border-left: 3px solid var(--accent);
+      border-radius: 0 6px 6px 0;
+      padding: 14px 18px;
+      margin: 16px 0;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .callout strong { color: var(--text); }
+
+    /* ── Pattern grid (small cards) ── */
+    .pattern-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .pattern-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+    }
+    .pattern-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+    .pattern-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* ── Sources section ── */
+    .source-group-title {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin: 24px 0 10px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--border);
+    }
+    .source-list {
+      list-style: none;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .source-list li {
+      display: flex;
+      gap: 10px;
+      align-items: baseline;
+    }
+    .source-list .src-title {
+      font-size: 13px;
+      color: var(--text);
+    }
+    .source-list .src-sep {
+      color: var(--border);
+      flex-shrink: 0;
+    }
+    .source-list a {
+      font-size: 12px;
+      color: var(--accent-2);
+      text-decoration: none;
+      word-break: break-all;
+    }
+    .source-list a:hover { text-decoration: underline; }
+
+    /* ── Footer ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 24px 0;
+      margin-top: 20px;
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+    footer a { color: var(--accent); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    /* ── Tabs ── */
+    .tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 24px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .tab-btn {
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 10px 16px;
+      white-space: nowrap;
+      transition: color 0.15s, border-color 0.15s;
+      margin-bottom: -1px;
+    }
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── Score cells ── */
+    .score {
+      display: inline-flex;
+      gap: 2px;
+      font-size: 12px;
+      line-height: 1;
+    }
+    .score .dot { color: var(--accent); }
+    .score .dot-off { color: var(--border); }
+
+    /* ── Responsive ── */
+    @media (max-width: 600px) {
+      .page-wrap { padding: 0 20px; }
+      h1 { font-size: 20px; }
+      .card-grid { grid-template-columns: 1fr; }
+      .pattern-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <button id="theme-toggle" aria-label="Toggle light/dark theme" title="Toggle theme">
+    <span id="theme-icon">🌙</span>
+  </button>
+
+  <div class="page-wrap">
+
+    <header>
+      <a class="back-link" href="../home/">← Home</a>
+      <div class="section-label">Deep Research · 2026</div>
+      <h1>REST API Design — <span>Best Practices & Benchmark</span></h1>
+      <div class="header-meta">
+        <span class="badge">research</span>
+        <span class="badge">api-design</span>
+        <span class="badge">engineering</span>
+        <span class="badge">2026</span>
+      </div>
+      <p>A curated benchmark of REST API design approaches — from foundational theory and formal specifications to industry guides and real-world patterns. Every claim is linked to its original source.</p>
+    </header>
+
+    <main>
+
+      <!-- TOC -->
+      <nav class="toc" aria-label="Page sections">
+        <div class="toc-title">Sections</div>
+        <ul class="toc-list">
+          <li><a href="#maturity">Richardson Maturity Model</a></li>
+          <li><a href="#foundations">Foundational Theory & RFCs</a></li>
+          <li><a href="#specs">Formal Specifications</a></li>
+          <li><a href="#industry">Industry Design Guides</a></li>
+          <li><a href="#realworld">Real-World API Patterns</a></li>
+          <li><a href="#versioning">Versioning Strategies</a></li>
+          <li><a href="#pagination">Pagination Patterns</a></li>
+          <li><a href="#errors">Error Handling</a></li>
+          <li><a href="#auth">Authentication</a></li>
+          <li><a href="#ratelimit">Rate Limiting</a></li>
+          <li><a href="#n1">The N+1 Problem</a></li>
+          <li><a href="#comparison">Approach Comparison</a></li>
+          <li><a href="#benchmark">Full Benchmark</a></li>
+          <li><a href="#books">Books & Guides</a></li>
+          <li><a href="#sources">All Sources</a></li>
+        </ul>
+      </nav>
+
+      <!-- ─── SECTION: Richardson Maturity Model ─────────────────────── -->
+      <section id="maturity">
+        <div class="section-label">Maturity Levels</div>
+        <h2>Richardson <span class="accent">Maturity Model</span></h2>
+        <p class="section-intro">Introduced by Leonard Richardson, codified by Martin Fowler — a 4-level framework to measure how REST-like an HTTP API is.</p>
+
+        <div class="callout">
+          <strong>Key insight:</strong> Most production APIs operate at Level 2 (HTTP verbs + proper status codes). Level 3 (HATEOAS) is the theoretical ideal but rarely implemented in practice. Roy Fielding argues that without HATEOAS, an API is not truly REST.
+        </div>
+
+        <div class="entry">
+          <div class="entry-header">
+            <div class="entry-title">Level 0 — The Swamp of POX (Plain Old XML)</div>
+            <span class="pill pill-yellow">Avoid</span>
+          </div>
+          <div class="entry-body">
+            <p>A single URI, a single HTTP method (usually POST), with different operations encoded in the request body. Classic SOAP/RPC style — HTTP is used purely as a transport.</p>
+            <pre>POST /appointmentService
+{ "action": "getSlots", "date": "2026-01-01" }
+
+POST /appointmentService
+{ "action": "bookSlot", "doctor": "dr-smith", "slot": "1400" }</pre>
+          </div>
+          <div class="entry-source">
+            <a href="https://martinfowler.com/articles/richardsonMaturityModel.html" target="_blank" rel="noopener">Martin Fowler — Richardson Maturity Model ↗</a>
+          </div>
+        </div>
+
+        <div class="entry">
+          <div class="entry-header">
+            <div class="entry-title">Level 1 — Resources</div>
+            <span class="pill pill-yellow">Minimal</span>
+          </div>
+          <div class="entry-body">
+            <p>Multiple URIs identifying individual resources. Still uses POST for everything, but at least different things have different addresses.</p>
+            <pre>POST /doctors/dr-smith           → get available slots
+POST /slots/1234                 → book a specific slot</pre>
+          </div>
+          <div class="entry-source">
+            <a href="https://martinfowler.com/articles/richardsonMaturityModel.html" target="_blank" rel="noopener">Martin Fowler — Richardson Maturity Model ↗</a>
+          </div>
+        </div>
+
+        <div class="entry">
+          <div class="entry-header">
+            <div class="entry-title">Level 2 — HTTP Verbs</div>
+            <span class="pill pill-blue">Industry Standard</span>
+          </div>
+          <div class="entry-body">
+            <p>Resources + correct HTTP methods (GET, POST, PUT, PATCH, DELETE) + meaningful status codes. This is where the vast majority of production APIs sit — including Stripe, GitHub, and most public APIs.</p>
+            <pre>GET  /doctors/dr-smith/slots?date=2026-01-01   → 200 OK, list slots
+POST /slots                                    → 201 Created, book slot
+DELETE /slots/1234                             → 204 No Content</pre>
+            <ul>
+              <li>GET is safe and idempotent — cacheable by proxies</li>
+              <li>POST creates; PUT/PATCH updates; DELETE removes</li>
+              <li>Correct status codes: 201 on create, 404 on not found, 409 on conflict</li>
+            </ul>
+          </div>
+          <div class="entry-source">
+            <a href="https://martinfowler.com/articles/richardsonMaturityModel.html" target="_blank" rel="noopener">Martin Fowler — Richardson Maturity Model ↗</a>
+            &nbsp;·&nbsp;
+            <a href="https://en.wikipedia.org/wiki/Richardson_Maturity_Model" target="_blank" rel="noopener">Wikipedia ↗</a>
+          </div>
+        </div>
+
+        <div class="entry">
+          <div class="entry-header">
+            <div class="entry-title">Level 3 — HATEOAS (Hypermedia Controls)</div>
+            <span class="pill pill-green">True REST</span>
+          </div>
+          <div class="entry-body">
+            <p>Responses include hypermedia links that tell the client what actions are possible next. The client only needs to know the entry point — it discovers everything else at runtime. Roy Fielding's position: <em>"If the engine of application state is not being driven by hypertext, then it cannot be RESTful."</em></p>
+            <pre>{
+  "slot": { "id": "1234", "time": "14:00", "status": "available" },
+  "_links": {
+    "self":   { "href": "/slots/1234" },
+    "book":   { "href": "/slots/1234/bookings", "method": "POST" },
+    "doctor": { "href": "/doctors/dr-smith" }
+  }
+}</pre>
+            <ul>
+              <li>Clients are decoupled from URL structure — URLs can change without breaking clients</li>
+              <li>Enables API evolution without client rewrites</li>
+              <li>New capabilities advertised in responses — self-documenting</li>
+              <li>Most APIs stop at Level 2 for the reasons below</li>
+            </ul>
+            <p style="margin-top:12px;font-weight:600;color:var(--text);">Why most production APIs don't implement HATEOAS:</p>
+            <ul>
+              <li><strong>Tooling gap:</strong> very few libraries exist to build or consume HATEOAS APIs properly</li>
+              <li><strong>Client behavior:</strong> most consumers (mobile apps, SPAs) hardcode endpoints anyway — decoupling is theoretical</li>
+              <li><strong>Payload bloat:</strong> HATEOAS URIs add significant response size</li>
+              <li><strong>Compatibility:</strong> retrofitting onto existing APIs breaks hardcoded clients</li>
+              <li><strong>Learning curve:</strong> team members need significant training to use link traversal correctly</li>
+              <li><strong>The fundamental paradox:</strong> if clients hardcode behavior regardless, the decoupling benefit doesn't materialize</li>
+            </ul>
+            <p style="margin-top:10px;"><strong>When HATEOAS is worth it:</strong> closed ecosystems where both client and server are controlled; APIs designed for long-term evolution with many diverse consumers who can genuinely adopt dynamic link traversal.</p>
+          </div>
+          <div class="entry-source">
+            <a href="https://roy.gbiv.com/untangled/2008/rest-apis-must-be-hypertext-driven" target="_blank" rel="noopener">Roy Fielding — REST APIs must be hypertext-driven ↗</a>
+            &nbsp;·&nbsp;
+            <a href="https://martinfowler.com/articles/richardsonMaturityModel.html" target="_blank" rel="noopener">Martin Fowler ↗</a>
+            &nbsp;·&nbsp;
+            <a href="https://nordicapis.com/unraveling-the-mystery-understanding-hateoas/" target="_blank" rel="noopener">Nordic APIs — Understanding HATEOAS ↗</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── SECTION: Foundational Theory ──────────────────────────── -->
+      <section id="foundations">
+        <div class="section-label">Theory</div>
+        <h2>Foundational <span class="accent">Theory & RFCs</span></h2>
+        <p class="section-intro">REST is an architectural style derived incrementally by applying constraints to a null-style architecture — from Roy Fielding's 2000 doctoral dissertation. Most APIs labeled "REST" violate at least one constraint. Understanding the theory clarifies what trade-offs you're actually making.</p>
+
+        <div class="entry">
+          <div class="entry-header">
+            <div class="entry-title">Roy Fielding's Dissertation — Chapter 5: REST (2000)</div>
+            <div class="entry-org">Roy Thomas Fielding · UC Irvine</div>
+          </div>
+          <div class="entry-body">
+            <p>REST was designed for the web's architecture, not as a recipe for JSON APIs. Fielding derived it by starting from a "null style" and adding constraints, each providing specific properties. The 6 constraints work as a system — removing any one changes the resulting properties fundamentally.</p>
+          </div>
+          <div class="entry-source">
+            <a href="https://roy.gbiv.com/pubs/dissertation/rest_arch_style.htm" target="_blank" rel="noopener">Fielding's Dissertation — Chapter 5 ↗</a>
+            &nbsp;·&nbsp;
+            <a href="https://twobithistory.org/2020/06/28/rest.html" target="_blank" rel="noopener">Two Bit History — "Misappropriated REST" ↗</a>
+          </div>
+        </div>
+
+        <h3>REST's 6 Architectural Constraints</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Constraint</th><th>What it means</th><th>Benefit</th><th>Trade-off</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><strong>Client-Server</strong></td>
+                <td>Separate UI concerns from data storage</td>
+                <td>Portability + scalability through separation of concerns</td>
+                <td>Adds coordination complexity</td>
+              </tr>
+              <tr>
+                <td><strong>Stateless</strong></td>
+                <td>Each request contains all info needed; no server-side session</td>
+                <td>Visibility, reliability, scalability — monitoring needs only one request</td>
+                <td>Repetitive data in requests; less server control over consistency</td>
+              </tr>
+              <tr>
+                <td><strong>Cacheable</strong></td>
+                <td>Responses declare whether they can be reused</td>
+                <td>Reduces latency and network load significantly</td>
+                <td>Risk of stale data diverging from server state</td>
+              </tr>
+              <tr>
+                <td><strong>Uniform Interface</strong></td>
+                <td>Standardized interactions: resource IDs, representations, self-descriptive messages, HATEOAS</td>
+                <td>Simplifies architecture; improves interaction visibility</td>
+                <td>Degrades efficiency — standardized formats aren't optimized per application</td>
+              </tr>
+              <tr>
+                <td><strong>Layered System</strong></td>
+                <td>Components only interact with adjacent layers; clients can't tell if directly connected to server</td>
+                <td>Enables load balancers, caches, security gateways, legacy integration</td>
+                <td>Adds latency and processing overhead</td>
+              </tr>
+              <tr>
+                <td><strong>Code on Demand</strong> <em>(optional)</em></td>
+                <td>Servers can transfer executable code to extend client functionality</td>
+                <td>Reduces features pre-implemented in clients</td>
+                <td>Decreases visibility; optional due to trust boundaries</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Fielding's 6 Rules for REST APIs (2008)</h3>
+        <div class="entry">
+          <div class="entry-body">
+            <ul>
+              <li>APIs should not depend on a single communication protocol</li>
+              <li>Must not introduce non-standard protocol elements</li>
+              <li>Primary design effort should go into <strong>media types and relation names</strong>, not URI patterns</li>
+              <li>No fixed URI hierarchies — servers must control their own namespace</li>
+              <li>Resource types are invisible to clients; only media types and relations matter</li>
+              <li>Clients must enter with only an initial URI and standard media types; <strong>all state transitions driven by server-provided choices</strong> (HATEOAS)</li>
+            </ul>
+            <p style="margin-top:10px;">Bottom line from Fielding: <em>"If the engine of application state is not being driven by hypertext, then it cannot be RESTful. Period."</em> Most industry APIs are RPC over HTTP, not REST.</p>
+          </div>
+          <div class="entry-source">
+            <a href="https://roy.gbiv.com/untangled/2008/rest-apis-must-be-hypertext-driven" target="_blank" rel="noopener">Fielding — REST APIs must be hypertext-driven ↗</a>
+          </div>
+        </div>
+
+        <h3>Key RFCs</h3>
+        <div class="entry">
+          <div class="entry-body">
+            <ul>
+              <li><strong>RFC 9110</strong> — HTTP Semantics (2022, supersedes RFC 7231): method definitions, status codes, headers, content negotiation. The authoritative reference for HTTP behavior. Safe methods (GET, HEAD) enable caching; idempotent methods (PUT, DELETE) enable retry safety.</li>
+              <li><strong>RFC 9457</strong> — Problem Details for HTTP APIs (supersedes RFC 7807): standard <code>application/problem+json</code> error format. Fields: <code>type</code> (URI), <code>title</code>, <code>status</code>, <code>detail</code>, <code>instance</code>. Extensible with custom members.</li>
+              <li><strong>RFC 8288</strong> — Web Linking (supersedes RFC 5988): <code>Link</code> header for typed hypermedia relationships. Foundation that HATEOAS implementations (HAL, Siren) build upon. Used by GitHub for pagination (<code>rel="next"</code>, <code>rel="last"</code>).</li>
+              <li><strong>RFC 6585</strong> — Additional HTTP Status Codes: defines <code>429 Too Many Requests</code> with <code>Retry-After</code> header — the standard for rate limiting responses.</li>
+              <li><strong>RFC 6902</strong> — JSON Patch: fine-grained PATCH operations (<code>add</code>, <code>remove</code>, <code>replace</code>, <code>move</code>, <code>copy</code>, <code>test</code>).</li>
+              <li><strong>RFC 7386</strong> — JSON Merge Patch: simpler PATCH format where <code>null</code> means delete a field.</li>
+              <li><strong>RFC 6750</strong> — Bearer Token usage in OAuth 2.0.</li>
+            </ul>
+          </div>
+          <div class="entry-source">
+            <a href="https://datatracker.ietf.org/doc/html/rfc9110" target="_blank" rel="noopener">RFC 9110 ↗</a>
+            &nbsp;·&nbsp;
+            <a href="https://www.rfc-editor.org/rfc/rfc9457.html" target="_blank" rel="noopener">RFC 9457 ↗</a>
+            &nbsp;·&nbsp;
+            <a href="https://httpwg.org/specs/rfc8288.html" target="_blank" rel="noopener">RFC 8288 ↗</a>
+            &nbsp;·&nbsp;
+            <a href="https://www.rfc-editor.org/rfc/rfc6585" target="_blank" rel="noopener">RFC 6585 ↗</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── SECTION: Formal Specifications ───────────────────────── -->
+      <section id="specs">
+        <div class="section-label">Specifications</div>
+        <h2>Formal <span class="accent">Specifications</span></h2>
+        <p class="section-intro">Standards that define how REST responses should be structured — especially for related resources, hypermedia, and compound documents.</p>
+
+        <div class="card-grid">
+
+          <div class="card">
+            <div class="card-org">JSON:API</div>
+            <div class="card-title">JSON:API v1.1</div>
+            <div class="card-body">
+              <ul>
+                <li>Compound documents with a single <code>included</code> array (deduplicates related objects)</li>
+                <li><code>relationships</code> section: type + id by default; embed via <code>?include=</code></li>
+                <li>Sparse fieldsets: <code>?fields[articles]=title,body</code></li>
+                <li>Best for APIs returning lists with many repeated related objects</li>
+              </ul>
+            </div>
+            <div class="card-footer">
+              <a class="source-link" href="https://jsonapi.org/format/" target="_blank" rel="noopener">jsonapi.org/format ↗</a>
+              &nbsp;·&nbsp;
+              <a class="source-link" href="https://jsonapi.org/format/#fetching-includes" target="_blank" rel="noopener">Fetching includes ↗</a>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-org">HAL</div>
+            <div class="card-title">HAL — Hyperlink Application Language</div>
+            <div class="card-body">
+              <ul>
+                <li><code>_links</code>: hypermedia references (always present)</li>
+                <li><code>_embedded</code>: opt-in inline data (server-controlled)</li>
+                <li>No deduplication — embedded objects may repeat</li>
+                <li>Best for hypermedia-first APIs committed to HATEOAS</li>
+              </ul>
+            </div>
+            <div class="card-footer">
+              <a class="source-link" href="https://stateless.group/hal_specification.html" target="_blank" rel="noopener">HAL Specification ↗</a>
+              &nbsp;·&nbsp;
+              <a class="source-link" href="https://www.baeldung.com/java-hal-vs-hateoas" target="_blank" rel="noopener">HAL vs HATEOAS ↗</a>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-org">OpenAPI Initiative</div>
+            <div class="card-title">OpenAPI Specification (OAS) 3.1</div>
+            <div class="card-body">
+              <ul>
+                <li>Machine-readable API description format (YAML/JSON)</li>
+                <li>Defines endpoints, request/response schemas, authentication, examples</li>
+                <li>Enables: code generation, docs, mocking, testing, SDK generation</li>
+                <li>Backed by Zalando, Microsoft, Google, Stripe, and most major API providers</li>
+              </ul>
+            </div>
+            <div class="card-footer">
+              <a class="source-link" href="https://spec.openapis.org/oas/v3.1.0" target="_blank" rel="noopener">OAS 3.1 Spec ↗</a>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-org">Google Protobuf / gRPC</div>
+            <div class="card-title">Protocol Buffers + AIP Standards</div>
+            <div class="card-body">
+              <ul>
+                <li>Google's internal API standard; many AIPs apply to REST too</li>
+                <li>FieldMask for partial responses (maps to <code>?fields=</code> in REST)</li>
+                <li>Resource names as full URL paths (not bare IDs)</li>
+                <li>Standard methods: Get, List, Create, Update (PATCH), Delete</li>
+              </ul>
+            </div>
+            <div class="card-footer">
+              <a class="source-link" href="https://google.aip.dev/121" target="_blank" rel="noopener">AIP-121 ↗</a>
+              &nbsp;·&nbsp;
+              <a class="source-link" href="https://google.aip.dev/157" target="_blank" rel="noopener">AIP-157 ↗</a>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-org">Kevin Swiber</div>
+            <div class="card-title">Siren — Hypermedia with Actions</div>
+            <div class="card-body">
+              <ul>
+                <li>Addresses HAL's gap: adds explicit <strong>actions</strong> (HTTP method, URL, fields)</li>
+                <li>Supports task-based non-CRUD interfaces</li>
+                <li>Entities with <code>class</code>, <code>properties</code>, <code>actions</code>, sub-entities</li>
+                <li>Full H-Factor coverage</li>
+              </ul>
+            </div>
+            <div class="card-footer">
+              <a class="source-link" href="https://github.com/kevinswiber/siren" target="_blank" rel="noopener">Siren spec (GitHub) ↗</a>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-org">Mike Amundsen</div>
+            <div class="card-title">Collection+JSON</div>
+            <div class="card-body">
+              <ul>
+                <li>Designed for read/write collection management</li>
+                <li>Templates for client data submission (write operations)</li>
+                <li>Queries property for predefined search parameters</li>
+                <li>Inspired by Atom (RFC 4287) and AtomPub (RFC 5023)</li>
+              </ul>
+            </div>
+            <div class="card-footer">
+              <a class="source-link" href="http://amundsen.com/media-types/collection/format/" target="_blank" rel="noopener">Collection+JSON spec ↗</a>
+            </div>
+          </div>
+
+        </div>
+
+        <h3>Hypermedia format — when to use which</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Scenario</th><th>Recommended</th><th>Reason</th></tr></thead>
+            <tbody>
+              <tr><td>Augmenting an existing API</td><td>JSON-LD</td><td>Semantic overlay without breaking changes</td></tr>
+              <tr><td>Keep it simple</td><td>HAL</td><td>Minimal footprint, wide tooling support</td></tr>
+              <tr><td>Collections with write operations</td><td>Collection+JSON</td><td>Built-in template/query/write semantics</td></tr>
+              <tr><td>Need explicit actions (non-CRUD)</td><td>Siren</td><td>Only format with action + field definitions</td></tr>
+              <tr><td>Broadest tooling &amp; client support</td><td>JSON:API</td><td>Most libraries, validators, and client generators</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="entry-source" style="margin-top:4px;">
+          <a href="https://sookocheff.com/post/api/on-choosing-a-hypermedia-format/" target="_blank" rel="noopener">Kevin Sookocheff — On choosing a hypermedia type ↗</a>
+        </div>
+
+      </section>
+
+      <!-- ─── SECTION: Industry Guides ──────────────────────────────── -->
+      <section id="industry">
+        <div class="section-label">Industry</div>
+        <h2>Industry <span class="accent">Design Guides</span></h2>
+        <p class="section-intro">Authoritative, opinionated REST API guidelines published by major tech organizations — each reflecting years of operating APIs at scale.</p>
+
+        <div class="entry">
+          <div class="entry-header">
+            <div class="entry-title">Google API Design Guide + AIPs</div>
+            <div class="entry-org">Google Cloud</div>
+          </div>
+          <div class="entry-body">
+            <ul>
+              <li><strong>Resource-oriented design</strong> (AIP-121): hierarchical resources with collections of same-type items. Three pillars: resources (nouns), standard methods (verbs), stateless interactions.</li>
+              <li><strong>Standard Methods</strong>: Get, List, Create, Update (PATCH only), Delete — every resource should support these.</li>
+              <li><strong>AIP-132 (List)</strong>: must include <code>next_page_token</code>; <code>page_size</code> + <code>page_token</code> on all list requests.</li>
+              <li><strong>AIP-157 (Partial Responses)</strong>: FieldMask via <code>?fields=</code> — <code>"*"</code> returns all, omitted defaults to all.</li>
+              <li><strong>Anti-patterns</strong>: API structure mirroring DB schemas; cyclic resource references.</li>
+              <li><strong>Resource names as links</strong> — use full URL paths, not bare integer IDs.</li>
+            </ul>
+          </div>
+          <div class="entry-source">
+            <a href="https://cloud.google.com/apis/design" target="_blank" rel="noopener">Google API Design Guide ↗</a>
+            &nbsp;·&nbsp;
+            <a href="https://google.aip.dev/121" target="_blank" rel="noopener">AIP-121 ↗</a>
+            &nbsp;·&nbsp;
+            <a href="https://google.aip.dev/157" target="_blank" rel="noopener">AIP-157 ↗</a>
+            &nbsp;·&nbsp;
+            <a href="https://cloud.google.com/blog/products/application-development/api-design-why-you-should-use-links-not-keys-to-represent-relationships-in-apis" target="_blank" rel="noopener">Links not Keys ↗</a>
+          </div>
+        </div>
+
+        <div class="entry">
+          <div class="entry-header">
+            <div class="entry-title">Microsoft REST API Guidelines</div>
+            <div class="entry-org">Microsoft</div>
+          </div>
+          <div class="entry-body">
+            <ul>
+              <li><strong>Versioning required from day one.</strong> Extensible enums (<code>modelAsString: true</code>) to add values without breaking clients.</li>
+              <li><strong>Idempotency</strong>: all methods must be idempotent. POST made idempotent via <code>Repeatability-Request-ID</code> + <code>Repeatability-First-Sent</code> headers.</li>
+              <li><strong>Structured errors</strong>: <code>ErrorResponse</code> → <code>ErrorDetail</code> with <code>code</code>, <code>message</code>, <code>target</code>, <code>details[]</code>, <code>innererror</code>. Plus <code>x-ms-error-code</code> header.</li>
+              <li><strong>Conditional requests</strong>: ETag/If-Match/If-None-Match for optimistic concurrency.</li>
+              <li><strong>LROs (Long-Running Operations)</strong>: return <code>202 Accepted</code> + status monitor resource for polling.</li>
+              <li><strong>Naming</strong>: kebab-case for URL segments, camelCase for query params, pluralized collection names.</li>
+              <li>Error philosophy: <em>"Customer can diagnose their own problems without contacting support."</em></li>
+            </ul>
+          </div>
+          <div class="entry-source">
+            <a href="https://github.com/microsoft/api-guidelines" target="_blank" rel="noopener">Microsoft API Guidelines (GitHub) ↗</a>
+            &nbsp;·&nbsp;
+            <a href="https://github.com/microsoft/api-guidelines/blob/vNext/azure/Guidelines.md" target="_blank" rel="noopener">Azure Guidelines ↗</a>
+          </div>
+        </div>
+
+        <div class="entry">
+          <div class="entry-header">
+            <div class="entry-title">Zalando RESTful API Guidelines</div>
+            <div class="entry-org">Zalando Tech</div>
+          </div>
+          <div class="entry-body">
+            <ul>
+              <li><strong>API-First principle</strong>: define API spec before writing code; peer review early.</li>
+              <li><strong>API as Product</strong>: treat APIs as business assets — focus on simplicity, usability, consistency.</li>
+              <li><strong>Naming</strong>: snake_case for JSON properties; kebab-case for URL paths; UPPER_SNAKE_CASE for enums.</li>
+              <li><strong>Versioning philosophy</strong>: avoid versioning via compatible extensions. If needed, prefer media-type versioning over URL path.</li>
+              <li><strong>Errors</strong>: MUST use RFC 7807/9457 Problem JSON. Never expose stack traces.</li>
+              <li><strong>Pagination</strong>: prefer cursor-based over offset-based.</li>
+              <li><strong>MUST/SHOULD/MAY</strong> classification system — over 200 structured rules.</li>
+              <li>Robustness: <em>"Be liberal in what you accept, be conservative in what you send."</em></li>
+            </ul>
+          </div>
+          <div class="entry-source">
+            <a href="https://opensource.zalando.com/restful-api-guidelines/" target="_blank" rel="noopener">Zalando Guidelines ↗</a>
+            &nbsp;·&nbsp;
+            <a href="https://github.com/zalando/restful-api-guidelines" target="_blank" rel="noopener">GitHub ↗</a>
+          </div>
+        </div>
+
+        <div class="entry">
+          <div class="entry-header">
+            <div class="entry-title">Atlassian REST API Guidelines</div>
+            <div class="entry-org">Atlassian</div>
+          </div>
+          <div class="entry-body">
+            <ul>
+              <li><strong>Resource expansion</strong>: <code>?expand=space,attachments</code> — parts of a resource not returned unless explicitly requested.</li>
+              <li>JSON as primary format; standard HTTP methods.</li>
+              <li>OAuth 2.0 recommended for production; API tokens over username/password.</li>
+              <li>Minimizes network traffic by defaulting to compact responses.</li>
+            </ul>
+          </div>
+          <div class="entry-source">
+            <a href="https://developer.atlassian.com/server/framework/atlassian-sdk/atlassian-rest-api-design-guidelines-version-1/" target="_blank" rel="noopener">Atlassian Guidelines ↗</a>
+          </div>
+        </div>
+
+        <div class="entry">
+          <div class="entry-header">
+            <div class="entry-title">PayPal API Standards</div>
+            <div class="entry-org">PayPal</div>
+          </div>
+          <div class="entry-body">
+            <ul>
+              <li>Foundation principles: loose coupling, encapsulation, stability, reusable services, contract-based.</li>
+              <li>HATEOAS support: hypermedia links in responses following REST methodology.</li>
+              <li>Standard HTTP headers and status codes with custom header conventions.</li>
+              <li>Full versioning and deprecation policy included.</li>
+            </ul>
+          </div>
+          <div class="entry-source">
+            <a href="https://github.com/levid-gc/paypal-api-standards/blob/master/api-style-guide.md" target="_blank" rel="noopener">PayPal API Style Guide ↗</a>
+          </div>
+        </div>
+
+        <div class="callout">
+          <strong>Consensus across all 5 guides:</strong> Resource-oriented design with nouns (not verbs), standard HTTP methods mapped to CRUD, structured error responses, explicit versioning, and pagination as a first-class concern.
+        </div>
+      </section>
+
+      <!-- ─── SECTION: Real-World Patterns ─────────────────────────── -->
+      <section id="realworld">
+        <div class="section-label">Real World</div>
+        <h2>Real-World <span class="accent">API Patterns</span></h2>
+        <p class="section-intro">How leading companies have solved REST design challenges in production APIs used by millions of developers.</p>
+
+        <div class="card-grid">
+
+          <div class="card">
+            <div class="card-org">Stripe</div>
+            <div class="card-title">The Gold Standard of REST</div>
+            <div class="card-body">
+              <ul>
+                <li><strong>Expandable objects</strong>: <code>?expand[]=customer</code> — related data in one request. Elegant N+1 solution.</li>
+                <li><strong>Date-based versioning</strong>: pinned per account, override via <code>Stripe-Version</code> header. 100+ breaking changes, all still supported.</li>
+                <li><strong>Idempotency keys</strong>: <code>Idempotency-Key</code> header caches result and returns on retry.</li>
+                <li><strong>Internal governance</strong>: 20-page API design doc; cross-functional review for every endpoint.</li>
+              </ul>
+            </div>
+            <div class="card-footer">
+              <a class="source-link" href="https://docs.stripe.com/api" target="_blank" rel="noopener">Stripe API ↗</a>
+              &nbsp;·&nbsp;
+              <a class="source-link" href="https://stripe.com/blog/api-versioning" target="_blank" rel="noopener">Versioning ↗</a>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-org">GitHub</div>
+            <div class="card-title">Pragmatic Embedding</div>
+            <div class="card-body">
+              <ul>
+                <li><strong>Eager embedding</strong>: always-needed relations embedded inline (e.g. <code>owner</code> inside <code>repository</code>).</li>
+                <li><strong>Link header pagination</strong>: RFC 8288 <code>rel="next"</code>, <code>rel="last"</code>.</li>
+                <li><strong>Rate limit headers</strong>: <code>X-RateLimit-Limit</code>, <code>-Remaining</code>, <code>-Reset</code>. Returns 429 on exceed.</li>
+                <li>5,000 req/hour for authenticated; 60 for unauthenticated.</li>
+              </ul>
+            </div>
+            <div class="card-footer">
+              <a class="source-link" href="https://docs.github.com/en/rest/using-the-rest-api/getting-started-with-the-rest-api" target="_blank" rel="noopener">GitHub REST docs ↗</a>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-org">Twilio</div>
+            <div class="card-title">Consistency as a Feature</div>
+            <div class="card-body">
+              <ul>
+                <li>Consistent structure across all products — code feels familiar regardless of which API.</li>
+                <li><strong>Documentation-driven design</strong>: write docs for sample apps first, then build.</li>
+                <li>Transversal API team for governance across product teams.</li>
+                <li>Treat docs like code: tested, reviewed before release.</li>
+              </ul>
+            </div>
+            <div class="card-footer">
+              <a class="source-link" href="https://blogs.mulesoft.com/dev-guides/api-design/twilio-3-tips-to-build-usable-apis/" target="_blank" rel="noopener">Twilio on usable APIs ↗</a>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-org">Twitter / X</div>
+            <div class="card-title">Fields & Expansions Pattern</div>
+            <div class="card-body">
+              <ul>
+                <li><code>?fields=</code> and <code>?expansions=</code> for controlling response shape — similar to JSON:API sparse fieldsets.</li>
+                <li>Cursor-based pagination with <code>next_token</code>.</li>
+                <li>Tiered rate limits by access level (Free → Enterprise).</li>
+              </ul>
+            </div>
+            <div class="card-footer">
+              <a class="source-link" href="https://docs.x.com/x-api/fundamentals/rate-limits" target="_blank" rel="noopener">X API Rate Limits ↗</a>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-org">WordPress</div>
+            <div class="card-title">HAL-Style Linking & Embedding</div>
+            <div class="card-body">
+              <ul>
+                <li><code>_links</code> present by default — hypermedia references to related resources.</li>
+                <li><code>?_embed</code> opt-in: inline related data into a single response.</li>
+                <li>Clean separation: link by default, embed on demand.</li>
+              </ul>
+            </div>
+            <div class="card-footer">
+              <a class="source-link" href="https://developer.wordpress.org/rest-api/using-the-rest-api/linking-and-embedding/" target="_blank" rel="noopener">WP Linking & Embedding ↗</a>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-org">Shopify</div>
+            <div class="card-title">Cost-Based Limits + Date Versioning</div>
+            <div class="card-body">
+              <ul>
+                <li>Date-based API versioning (e.g. <code>2024-04</code>) similar to Stripe.</li>
+                <li>REST Admin API deprecated October 2024; all new apps must use GraphQL.</li>
+                <li><strong>Anti-pattern identified</strong>: including IDs of other objects instead of the objects themselves.</li>
+              </ul>
+            </div>
+            <div class="card-footer">
+              <a class="source-link" href="https://shopify.engineering/unifying-graphql-design-patterns-best-practices-tutorials" target="_blank" rel="noopener">Shopify Engineering ↗</a>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ─── SECTION: Versioning ───────────────────────────────────── -->
+      <section id="versioning">
+        <div class="section-label">Pattern</div>
+        <h2>Versioning <span class="accent">Strategies</span></h2>
+        <p class="section-intro">How to evolve an API without breaking existing clients — the most consequential architectural decision you'll make.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Strategy</th>
+                <th>Mechanism</th>
+                <th>Examples</th>
+                <th>Pros</th>
+                <th>Cons</th>
+                <th>Verdict</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>URL path</strong></td>
+                <td><code>/v1/users</code></td>
+                <td>Google, PayPal, most public APIs</td>
+                <td>Simple, browser-explorable, cache-friendly</td>
+                <td>URL pollution; code duplication across versions</td>
+                <td><span class="pill pill-blue">Common</span></td>
+              </tr>
+              <tr>
+                <td><strong>Header versioning</strong></td>
+                <td><code>API-Version: 2</code></td>
+                <td>Microsoft Azure</td>
+                <td>Clean URLs</td>
+                <td>Hard to test in browser; not cache-friendly without Vary</td>
+                <td><span class="pill pill-yellow">Context-dependent</span></td>
+              </tr>
+              <tr>
+                <td><strong>Query param</strong></td>
+                <td><code>?api-version=2</code></td>
+                <td>Some Microsoft APIs</td>
+                <td>Easy to add</td>
+                <td>Pollutes query string; easy to overlook</td>
+                <td><span class="pill pill-yellow">Avoid</span></td>
+              </tr>
+              <tr>
+                <td><strong>Date-based</strong></td>
+                <td>Version = release date; pinned per account</td>
+                <td>Stripe (<code>2017-05-25</code>), Shopify (<code>2024-04</code>)</td>
+                <td>Incremental upgrades; no major jumps; 100+ changes supported by Stripe</td>
+                <td>Complex version-change module architecture required</td>
+                <td><span class="pill pill-green">Gold standard</span></td>
+              </tr>
+              <tr>
+                <td><strong>Media type</strong></td>
+                <td><code>Accept: application/vnd.api+json;version=2</code></td>
+                <td>Zalando (preferred), GitHub (partial)</td>
+                <td>RESTfully purist; clean URLs</td>
+                <td>Complex for clients; not browser-explorable</td>
+                <td><span class="pill pill-yellow">Niche</span></td>
+              </tr>
+              <tr>
+                <td><strong>No versioning</strong></td>
+                <td>Only backwards-compatible changes forever</td>
+                <td>Zalando (ideal), mature internal APIs</td>
+                <td>Zero client disruption; lowest maintenance</td>
+                <td>Requires extreme discipline; not always possible</td>
+                <td><span class="pill pill-green">Ideal if achievable</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout">
+          <strong>Stripe's insight:</strong> Their version-change module architecture — each breaking change is a self-contained transform — lets them maintain compatibility with every version since 2011 (~100 changes) at fixed maintenance cost. The key: immutable response shapes per version, transformation in middleware.
+        </div>
+      </section>
+
+      <!-- ─── SECTION: Pagination ───────────────────────────────────── -->
+      <section id="pagination">
+        <div class="section-label">Pattern</div>
+        <h2>Pagination <span class="accent">Patterns</span></h2>
+        <p class="section-intro">How to page through large result sets — a choice with significant performance and consistency implications.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Pattern</th>
+                <th>Params</th>
+                <th>DB Query</th>
+                <th>Performance</th>
+                <th>Consistency</th>
+                <th>Random Access</th>
+                <th>Best for</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Offset</strong></td>
+                <td><code>?offset=20&limit=10</code></td>
+                <td><code>LIMIT 10 OFFSET 20</code></td>
+                <td>Degrades on large offsets (full scan)</td>
+                <td>Inconsistent if data changes between pages</td>
+                <td>Yes</td>
+                <td>Small, static datasets</td>
+              </tr>
+              <tr>
+                <td><strong>Cursor (keyset)</strong></td>
+                <td><code>?cursor=eyJpZCI6MTIzfQ==</code></td>
+                <td><code>WHERE (created_at, id) &gt; (?, ?)</code></td>
+                <td>O(1) regardless of position</td>
+                <td>Consistent under concurrent writes</td>
+                <td>No</td>
+                <td>Large, frequently-changing data</td>
+              </tr>
+              <tr>
+                <td><strong>Page token</strong> (Google)</td>
+                <td><code>?page_token=TOKEN</code></td>
+                <td>Server-controlled opaque token</td>
+                <td>O(1) with index</td>
+                <td>Server-controlled</td>
+                <td>No</td>
+                <td>Public APIs with server-side cursor management</td>
+              </tr>
+              <tr>
+                <td><strong>Link header</strong> (RFC 8288)</td>
+                <td>Encoded in <code>Link</code> response header</td>
+                <td>Depends on underlying impl</td>
+                <td>Depends</td>
+                <td>Depends</td>
+                <td>Depends</td>
+                <td>Decoupled pagination URLs from response body (GitHub)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout">
+          <strong>Industry consensus:</strong> Prefer cursor-based (keyset) pagination for production APIs. Zalando, Google, Slack, and Twitter all recommend it. Use indexed, immutable, unique fields for the cursor — typically a compound (<code>created_at</code>, <code>id</code>) pair. Always return a <code>next_page_token</code> / <code>next</code> link — never make clients construct pagination URLs.
+        </div>
+
+        <h3>Cursor implementation example</h3>
+        <pre>-- Efficient keyset pagination (no OFFSET)
+SELECT * FROM orders
+WHERE (created_at, id) &lt; (:cursor_created_at, :cursor_id)
+ORDER BY created_at DESC, id DESC
+LIMIT 25;
+
+-- Response includes
+{
+  "data": [...],
+  "next_page_token": "eyJjcmVhdGVkX2F0IjoiMjAyNi0wMS0wMSIsImlkIjoiMTIzIn0="
+}</pre>
+      </section>
+
+      <!-- ─── SECTION: Error Handling ───────────────────────────────── -->
+      <section id="errors">
+        <div class="section-label">Pattern</div>
+        <h2>Error <span class="accent">Handling</span></h2>
+        <p class="section-intro">Structured, machine-readable errors are as important as correct responses. RFC 9457 is the emerging standard.</p>
+
+        <h3>RFC 9457 — Problem Details (the standard)</h3>
+        <pre>HTTP/1.1 422 Unprocessable Entity
+Content-Type: application/problem+json
+
+{
+  "type": "https://api.example.com/errors/validation-failed",
+  "title": "Validation Failed",
+  "status": 422,
+  "detail": "The 'email' field must be a valid email address.",
+  "instance": "/logs/abc-1234",
+  "invalid-params": [{ "name": "email", "reason": "not a valid email" }]
+}</pre>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Org</th>
+                <th>Format</th>
+                <th>Key fields</th>
+                <th>Standout feature</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>RFC 9457</strong></td>
+                <td><code>application/problem+json</code></td>
+                <td><code>type</code>, <code>title</code>, <code>status</code>, <code>detail</code>, <code>instance</code></td>
+                <td>Extensible — custom members allowed</td>
+              </tr>
+              <tr>
+                <td><strong>Stripe</strong></td>
+                <td>Top-level <code>error</code> object</td>
+                <td><code>type</code>, <code>code</code>, <code>message</code>, <code>param</code>, <code>doc_url</code></td>
+                <td><code>doc_url</code> links directly to error docs — best DX</td>
+              </tr>
+              <tr>
+                <td><strong>Google</strong></td>
+                <td>gRPC Status → HTTP</td>
+                <td><code>code</code>, <code>message</code>, <code>details[]</code> (typed)</td>
+                <td>Typed detail types: BadRequest, RetryInfo, DebugInfo</td>
+              </tr>
+              <tr>
+                <td><strong>Microsoft</strong></td>
+                <td><code>ErrorResponse</code> → <code>ErrorDetail</code></td>
+                <td><code>code</code>, <code>message</code>, <code>target</code>, <code>details[]</code>, <code>innererror</code></td>
+                <td>Nested <code>innererror</code>; <code>x-ms-error-code</code> header</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Essential HTTP status codes</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Code</th><th>Meaning</th><th>When to use</th></tr></thead>
+            <tbody>
+              <tr><td><code>200</code></td><td>OK</td><td>Successful GET, PUT, PATCH, DELETE with body</td></tr>
+              <tr><td><code>201</code></td><td>Created</td><td>Successful POST creating a resource (+ <code>Location</code> header)</td></tr>
+              <tr><td><code>204</code></td><td>No Content</td><td>Successful operation with no response body</td></tr>
+              <tr><td><code>304</code></td><td>Not Modified</td><td>Cache validation hit (ETag/If-None-Match)</td></tr>
+              <tr><td><code>400</code></td><td>Bad Request</td><td>Malformed request syntax</td></tr>
+              <tr><td><code>401</code></td><td>Unauthorized</td><td>Missing or invalid authentication</td></tr>
+              <tr><td><code>403</code></td><td>Forbidden</td><td>Authenticated but insufficient permissions</td></tr>
+              <tr><td><code>404</code></td><td>Not Found</td><td>Resource doesn't exist</td></tr>
+              <tr><td><code>409</code></td><td>Conflict</td><td>State conflict (e.g. concurrent modification)</td></tr>
+              <tr><td><code>422</code></td><td>Unprocessable Entity</td><td>Validation errors on a well-formed request</td></tr>
+              <tr><td><code>429</code></td><td>Too Many Requests</td><td>Rate limit exceeded (RFC 6585); include <code>Retry-After</code></td></tr>
+              <tr><td><code>500</code></td><td>Internal Server Error</td><td>Unexpected server failure</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ─── SECTION: Auth ─────────────────────────────────────────── -->
+      <section id="auth">
+        <div class="section-label">Pattern</div>
+        <h2>Authentication <span class="accent">Patterns</span></h2>
+        <p class="section-intro">How clients prove identity — and how to choose the right mechanism.</p>
+
+        <div class="card-grid">
+          <div class="card">
+            <div class="card-title">API Keys</div>
+            <div class="card-body">
+              <ul>
+                <li>Passed as header (<code>X-API-Key</code>) or query param</li>
+                <li>Simple server-to-server auth</li>
+                <li>Static — no expiration or scope</li>
+                <li>Best practice: header only, never in URLs or client-side code</li>
+              </ul>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">OAuth 2.0 + Bearer Tokens</div>
+            <div class="card-body">
+              <ul>
+                <li>Industry standard for delegated authorization</li>
+                <li>Authorization Code (server-side apps) vs Client Credentials (machine-to-machine)</li>
+                <li>Scoped access, expiration, refresh tokens</li>
+                <li>Used by: GitHub, Google, Microsoft, Slack, Atlassian</li>
+              </ul>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">JWT (JSON Web Tokens)</div>
+            <div class="card-body">
+              <ul>
+                <li>Self-contained tokens with claims (<code>sub</code>, <code>exp</code>, <code>iss</code>, scopes)</li>
+                <li>Stateless verification — no DB lookup on each request</li>
+                <li>Best practice: short lifetime (15-60 min) + refresh tokens</li>
+                <li>Cannot be revoked individually until expiry</li>
+              </ul>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">Advanced Patterns</div>
+            <div class="card-body">
+              <ul>
+                <li><strong>mTLS</strong>: Mutual TLS — cryptographic client identity, zero-trust architectures</li>
+                <li><strong>DPoP</strong>: Demonstration of Proof of Possession — binds tokens to clients, prevents replay</li>
+                <li><strong>Fine-grained scopes</strong>: GitHub fine-grained PATs, OAuth scopes per resource</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout">
+          <strong>Rule:</strong> Always HTTPS — throw hard errors, never redirect to HTTP (Vinay Sahni). Short-lived tokens + refresh tokens. API keys server-side only. Log access, monitor anomalies.
+        </div>
+      </section>
+
+      <!-- ─── SECTION: Rate Limiting ────────────────────────────────── -->
+      <section id="ratelimit">
+        <div class="section-label">Pattern</div>
+        <h2>Rate <span class="accent">Limiting</span></h2>
+        <p class="section-intro">Standard headers, algorithms, and client-side strategies for fair API usage.</p>
+
+        <h3>Standard response headers</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Header</th><th>Meaning</th><th>Used by</th></tr></thead>
+            <tbody>
+              <tr><td><code>X-RateLimit-Limit</code></td><td>Max requests per window</td><td>GitHub, Twitter, Stripe</td></tr>
+              <tr><td><code>X-RateLimit-Remaining</code></td><td>Requests remaining in current window</td><td>GitHub, Twitter, Stripe</td></tr>
+              <tr><td><code>X-RateLimit-Reset</code></td><td>When the limit resets (epoch seconds or timestamp)</td><td>GitHub, Twitter, Stripe</td></tr>
+              <tr><td><code>Retry-After</code></td><td>Seconds to wait before retrying (RFC 6585)</td><td>Standard</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Algorithm comparison</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Algorithm</th><th>Mechanism</th><th>Burst support</th><th>Best for</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Token bucket</strong></td><td>Tokens added at fixed rate, each request consumes one</td><td>Yes</td><td>APIs that should allow occasional bursts</td></tr>
+              <tr><td><strong>Sliding window</strong></td><td>Rolling time window, no boundary burst</td><td>No</td><td>Precision — most fair to users</td></tr>
+              <tr><td><strong>Fixed window</strong></td><td>Count resets at fixed intervals</td><td>Boundary burst possible</td><td>Memory-constrained systems</td></tr>
+              <tr><td><strong>Cost-based</strong></td><td>Queries charged by complexity, not count</td><td>Depends on budget</td><td>GraphQL (Shopify)</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout">
+          <strong>Client strategy:</strong> Implement exponential backoff — wait <code>2^n</code> seconds on failure. Add random jitter to prevent thundering herd. Read rate limit headers proactively, don't wait for 429. Centralize rate limit state in Redis for distributed systems (Stripe, GitHub pattern).
+        </div>
+      </section>
+
+      <!-- ─── SECTION: N+1 Problem ──────────────────────────────────── -->
+      <section id="n1">
+        <div class="section-label">Pattern</div>
+        <h2>The N+1 <span class="accent">Problem</span></h2>
+        <p class="section-intro">Fetching a list of resources then making N additional requests for each item's related data. The most common REST performance anti-pattern.</p>
+
+        <div class="callout">
+          <strong>Example:</strong> <code>GET /orders</code> returns 50 orders → 50 × <code>GET /customers/{id}</code> for each order's customer. Total: 51 requests instead of 1.
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Solution</th>
+                <th>Mechanism</th>
+                <th>Example</th>
+                <th>Used by</th>
+                <th>Deduplicates?</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Expandable objects</strong></td>
+                <td>Query param opt-in embedding</td>
+                <td><code>?expand[]=customer</code></td>
+                <td>Stripe, Atlassian</td>
+                <td>No</td>
+              </tr>
+              <tr>
+                <td><strong>Compound documents</strong></td>
+                <td>Sideloaded <code>included</code> array</td>
+                <td><code>?include=comments.author</code></td>
+                <td>JSON:API</td>
+                <td>Yes</td>
+              </tr>
+              <tr>
+                <td><strong>Sparse fieldsets</strong></td>
+                <td>Per-type field filtering</td>
+                <td><code>?fields[articles]=title,body</code></td>
+                <td>JSON:API, Twitter</td>
+                <td>N/A</td>
+              </tr>
+              <tr>
+                <td><strong>Field masks</strong></td>
+                <td>FieldMask proto / query param</td>
+                <td><code>?fields=name,customer.email</code></td>
+                <td>Google APIs</td>
+                <td>N/A</td>
+              </tr>
+              <tr>
+                <td><strong>Embed parameter</strong></td>
+                <td>Custom embed convention</td>
+                <td><code>?embed=customer.name</code></td>
+                <td>Vinay Sahni, WordPress</td>
+                <td>No</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout">
+          <strong>Best practice:</strong> Link by default, embed by exception. Use JSON:API <code>?include=</code> when the same related object appears repeatedly in a list (deduplication matters). Use Stripe's <code>expand[]</code> for single-resource expansion. For extreme N+1 cases across many resource types, consider GraphQL.
+        </div>
+      </section>
+
+      <!-- ─── SECTION: Approach Comparison ─────────────────────────── -->
+      <section id="comparison">
+        <div class="section-label">Benchmark</div>
+        <h2>Approach <span class="accent">Comparison</span></h2>
+        <p class="section-intro">How major REST patterns handle related resources — the central design decision in API architecture.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Approach</th>
+                <th>Default for related resources</th>
+                <th>Opt-in embedding</th>
+                <th>Deduplication</th>
+                <th>Best for</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>RMM Level 3 / HATEOAS</strong></td>
+                <td><code>_links</code> with <code>href</code> + <code>rel</code></td>
+                <td>No standard</td>
+                <td>N/A</td>
+                <td>True REST compliance, discoverable APIs</td>
+              </tr>
+              <tr>
+                <td><strong>JSON:API</strong></td>
+                <td><code>relationships</code> (type + id)</td>
+                <td><code>?include=relation</code></td>
+                <td>Yes — single <code>included</code> array</td>
+                <td>APIs with repeated related objects in lists</td>
+              </tr>
+              <tr>
+                <td><strong>HAL</strong></td>
+                <td><code>_links</code></td>
+                <td><code>_embedded</code> (server-controlled)</td>
+                <td>No</td>
+                <td>Hypermedia-first APIs</td>
+              </tr>
+              <tr>
+                <td><strong>Google AIP</strong></td>
+                <td>Resource name (full URL path)</td>
+                <td>FieldMask (<code>?fields=</code>)</td>
+                <td>N/A</td>
+                <td>Large, multi-team public APIs</td>
+              </tr>
+              <tr>
+                <td><strong>Stripe</strong></td>
+                <td>Bare ID string</td>
+                <td><code>?expand[]=field</code> (dot-notation, max depth 4)</td>
+                <td>No — duplicated inline</td>
+                <td>Developer-facing APIs with flexible clients</td>
+              </tr>
+              <tr>
+                <td><strong>GitHub</strong></td>
+                <td>Eager embed for frequent relations</td>
+                <td>No standard mechanism</td>
+                <td>N/A</td>
+                <td>Known clients with stable access patterns</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Decision framework</h3>
+        <div class="callout" style="border-left-color: var(--accent-2);">
+          <strong>Guiding principle:</strong> Link by default. Embed by exception, driven by measured client usage.
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Situation</th><th>Recommendation</th></tr></thead>
+            <tbody>
+              <tr><td>Related resource is always needed with the parent</td><td>Embed by default (GitHub <code>owner</code> inside <code>repository</code>)</td></tr>
+              <tr><td>Related resource is sometimes needed</td><td>Link by default + <code>?expand=</code> on demand (Stripe)</td></tr>
+              <tr><td>Same related object repeated across a large list</td><td><code>?include=</code> with deduplication (JSON:API)</td></tr>
+              <tr><td>Unknown external clients</td><td>Link by default; let clients opt in</td></tr>
+              <tr><td>Internal API with known, uniform clients</td><td>Embed what is always needed; skip expansion infrastructure</td></tr>
+              <tr><td>Need partial fields from related objects</td><td>Sparse fieldsets (<code>?fields[type]=a,b</code>) or FieldMask</td></tr>
+              <tr><td>Deep nested relationship traversal needed</td><td>Stripe dot-notation (<code>invoice.subscription.payment_method</code>) with depth limit</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ─── SECTION: Full Benchmark ─────────────────────────────── -->
+      <section id="benchmark">
+        <div class="section-label">Benchmark</div>
+        <h2>Full <span class="accent">Benchmark</span></h2>
+        <p class="section-intro">Side-by-side scoring across five dimensions: API design styles, hypermedia formats, industry guides, real-world APIs, and key patterns. Each row is rated on tooling, adoption, DX, and fit for purpose.</p>
+
+        <div class="tabs" role="tablist">
+          <button class="tab-btn active" role="tab" data-tab="bm-styles">API Styles</button>
+          <button class="tab-btn" role="tab" data-tab="bm-hypermedia">Hypermedia Formats</button>
+          <button class="tab-btn" role="tab" data-tab="bm-guides">Industry Guides</button>
+          <button class="tab-btn" role="tab" data-tab="bm-realworld">Real-World APIs</button>
+          <button class="tab-btn" role="tab" data-tab="bm-patterns">Patterns</button>
+        </div>
+
+        <!-- Tab: API Styles -->
+        <div class="tab-panel active" id="bm-styles">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Style</th>
+                  <th>RMM Level</th>
+                  <th>Tooling</th>
+                  <th>DX</th>
+                  <th>Evolvability</th>
+                  <th>Adoption</th>
+                  <th>Learning curve</th>
+                  <th>Best for</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>RPC over HTTP</strong> (Level 0)</td>
+                  <td><span class="pill pill-yellow">0</span></td>
+                  <td><span class="score"><span class="dot">●●●●●</span></span></td>
+                  <td><span class="score"><span class="dot">●●</span><span class="dot-off">●●●</span></span></td>
+                  <td><span class="score"><span class="dot">●</span><span class="dot-off">●●●●</span></span></td>
+                  <td><span class="score"><span class="dot">●●●</span><span class="dot-off">●●</span></span></td>
+                  <td>Low</td>
+                  <td>Legacy SOAP/RPC, internal tools</td>
+                </tr>
+                <tr>
+                  <td><strong>Resources only</strong> (Level 1)</td>
+                  <td><span class="pill pill-yellow">1</span></td>
+                  <td><span class="score"><span class="dot">●●●●●</span></span></td>
+                  <td><span class="score"><span class="dot">●●●</span><span class="dot-off">●●</span></span></td>
+                  <td><span class="score"><span class="dot">●●</span><span class="dot-off">●●●</span></span></td>
+                  <td><span class="score"><span class="dot">●●●</span><span class="dot-off">●●</span></span></td>
+                  <td>Low</td>
+                  <td>Simple internal services</td>
+                </tr>
+                <tr>
+                  <td><strong>HTTP Verbs + Status codes</strong> (Level 2)</td>
+                  <td><span class="pill pill-blue">2</span></td>
+                  <td><span class="score"><span class="dot">●●●●●</span></span></td>
+                  <td><span class="score"><span class="dot">●●●●</span><span class="dot-off">●</span></span></td>
+                  <td><span class="score"><span class="dot">●●●</span><span class="dot-off">●●</span></span></td>
+                  <td><span class="score"><span class="dot">●●●●●</span></span></td>
+                  <td>Low–Medium</td>
+                  <td>Most public APIs (Stripe, GitHub, Twilio)</td>
+                </tr>
+                <tr>
+                  <td><strong>HATEOAS</strong> (Level 3)</td>
+                  <td><span class="pill pill-green">3</span></td>
+                  <td><span class="score"><span class="dot">●●</span><span class="dot-off">●●●</span></span></td>
+                  <td><span class="score"><span class="dot">●●●</span><span class="dot-off">●●</span></span></td>
+                  <td><span class="score"><span class="dot">●●●●●</span></span></td>
+                  <td><span class="score"><span class="dot">●●</span><span class="dot-off">●●●</span></span></td>
+                  <td>High</td>
+                  <td>Closed ecosystems, long-lived APIs with diverse consumers</td>
+                </tr>
+                <tr>
+                  <td><strong>GraphQL</strong></td>
+                  <td>N/A</td>
+                  <td><span class="score"><span class="dot">●●●●</span><span class="dot-off">●</span></span></td>
+                  <td><span class="score"><span class="dot">●●●●●</span></span></td>
+                  <td><span class="score"><span class="dot">●●●●</span><span class="dot-off">●</span></span></td>
+                  <td><span class="score"><span class="dot">●●●●</span><span class="dot-off">●</span></span></td>
+                  <td>Medium</td>
+                  <td>Complex data graphs, internal APIs (Netflix, Shopify)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p style="font-size:12px;color:var(--text-muted);margin-top:8px;">● = filled · ● = empty · Scale: 1–5 per dimension (tooling support, DX, evolvability, industry adoption)</p>
+        </div>
+
+        <!-- Tab: Hypermedia Formats -->
+        <div class="tab-panel" id="bm-hypermedia">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Format</th>
+                  <th>Media type</th>
+                  <th>Links</th>
+                  <th>Embed</th>
+                  <th>Actions</th>
+                  <th>Deduplication</th>
+                  <th>Tooling</th>
+                  <th>Complexity</th>
+                  <th>Best for</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>HAL</strong></td>
+                  <td><code>application/hal+json</code></td>
+                  <td><span class="pill pill-green">Yes</span></td>
+                  <td><span class="pill pill-green">Yes (_embedded)</span></td>
+                  <td><span class="pill pill-yellow">No</span></td>
+                  <td><span class="pill pill-yellow">No</span></td>
+                  <td><span class="score"><span class="dot">●●●●</span><span class="dot-off">●</span></span></td>
+                  <td>Low</td>
+                  <td>Simple hypermedia, augmenting existing APIs</td>
+                </tr>
+                <tr>
+                  <td><strong>JSON:API</strong></td>
+                  <td><code>application/vnd.api+json</code></td>
+                  <td><span class="pill pill-green">Yes</span></td>
+                  <td><span class="pill pill-green">Yes (?include=)</span></td>
+                  <td><span class="pill pill-yellow">No</span></td>
+                  <td><span class="pill pill-green">Yes (included[])</span></td>
+                  <td><span class="score"><span class="dot">●●●●●</span></span></td>
+                  <td>Medium</td>
+                  <td>Lists with repeated related objects, broadest tooling</td>
+                </tr>
+                <tr>
+                  <td><strong>Siren</strong></td>
+                  <td><code>application/vnd.siren+json</code></td>
+                  <td><span class="pill pill-green">Yes</span></td>
+                  <td><span class="pill pill-green">Yes (entities)</span></td>
+                  <td><span class="pill pill-green">Yes (actions[])</span></td>
+                  <td><span class="pill pill-yellow">No</span></td>
+                  <td><span class="score"><span class="dot">●●</span><span class="dot-off">●●●</span></span></td>
+                  <td>Medium–High</td>
+                  <td>Task-based / non-CRUD interfaces needing explicit actions</td>
+                </tr>
+                <tr>
+                  <td><strong>Collection+JSON</strong></td>
+                  <td><code>application/vnd.collection+json</code></td>
+                  <td><span class="pill pill-green">Yes</span></td>
+                  <td><span class="pill pill-yellow">Partial</span></td>
+                  <td><span class="pill pill-green">Yes (template)</span></td>
+                  <td><span class="pill pill-yellow">No</span></td>
+                  <td><span class="score"><span class="dot">●●</span><span class="dot-off">●●●</span></span></td>
+                  <td>Medium</td>
+                  <td>Read/write collection management</td>
+                </tr>
+                <tr>
+                  <td><strong>OpenAPI (OAS)</strong></td>
+                  <td>YAML/JSON description</td>
+                  <td><span class="pill pill-yellow">Meta only</span></td>
+                  <td><span class="pill pill-yellow">N/A</span></td>
+                  <td><span class="pill pill-green">Yes (operations)</span></td>
+                  <td><span class="pill pill-yellow">N/A</span></td>
+                  <td><span class="score"><span class="dot">●●●●●</span></span></td>
+                  <td>Low–Medium</td>
+                  <td>Documentation, code gen, mocking, testing — industry standard</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Tab: Industry Guides -->
+        <div class="tab-panel" id="bm-guides">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Guide</th>
+                  <th>Open source</th>
+                  <th>Versioning</th>
+                  <th>Naming (JSON)</th>
+                  <th>Pagination</th>
+                  <th>Error standard</th>
+                  <th>HATEOAS stance</th>
+                  <th>Governance</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong><a href="https://cloud.google.com/apis/design" target="_blank" rel="noopener">Google</a></strong></td>
+                  <td><span class="pill pill-green">Yes</span></td>
+                  <td>URL path (<code>/v1/</code>)</td>
+                  <td>camelCase</td>
+                  <td>Page token (<code>next_page_token</code>)</td>
+                  <td>gRPC Status → HTTP</td>
+                  <td>Resource names as links (AIP-121)</td>
+                  <td>AIPs — numbered proposals</td>
+                </tr>
+                <tr>
+                  <td><strong><a href="https://github.com/microsoft/api-guidelines" target="_blank" rel="noopener">Microsoft</a></strong></td>
+                  <td><span class="pill pill-green">Yes</span></td>
+                  <td>Header / query param (<code>api-version</code>)</td>
+                  <td>camelCase</td>
+                  <td>skip/top + maxpagesize</td>
+                  <td>Custom ErrorResponse + <code>x-ms-error-code</code> header</td>
+                  <td>Not required; resource names encouraged</td>
+                  <td>Versioned doc, cross-company</td>
+                </tr>
+                <tr>
+                  <td><strong><a href="https://opensource.zalando.com/restful-api-guidelines/" target="_blank" rel="noopener">Zalando</a></strong></td>
+                  <td><span class="pill pill-green">Yes</span></td>
+                  <td>Avoid; media type if needed</td>
+                  <td>snake_case</td>
+                  <td>Cursor-based (preferred)</td>
+                  <td>RFC 9457 Problem Details (MUST)</td>
+                  <td>RMM Level 2 minimum; full HATEOAS not required</td>
+                  <td>MUST/SHOULD/MAY rules (200+)</td>
+                </tr>
+                <tr>
+                  <td><strong><a href="https://developer.atlassian.com/server/framework/atlassian-sdk/atlassian-rest-api-design-guidelines-version-1/" target="_blank" rel="noopener">Atlassian</a></strong></td>
+                  <td><span class="pill pill-green">Yes</span></td>
+                  <td>URL path</td>
+                  <td>camelCase</td>
+                  <td>Offset + limit</td>
+                  <td>Custom JSON errors</td>
+                  <td>Resource expansion (<code>?expand=</code>)</td>
+                  <td>Internal doc, published externally</td>
+                </tr>
+                <tr>
+                  <td><strong><a href="https://github.com/levid-gc/paypal-api-standards/blob/master/api-style-guide.md" target="_blank" rel="noopener">PayPal</a></strong></td>
+                  <td><span class="pill pill-green">Yes</span></td>
+                  <td>URL path</td>
+                  <td>snake_case</td>
+                  <td>Cursor + count</td>
+                  <td>Custom + HATEOAS links</td>
+                  <td>Strong — HATEOAS links in all responses</td>
+                  <td>Internal; updated over years</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Tab: Real-World APIs -->
+        <div class="tab-panel" id="bm-realworld">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>API</th>
+                  <th>Versioning</th>
+                  <th>N+1 solution</th>
+                  <th>Pagination</th>
+                  <th>Errors</th>
+                  <th>Idempotency</th>
+                  <th>Auth</th>
+                  <th>DX rating</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong><a href="https://docs.stripe.com/api" target="_blank" rel="noopener">Stripe</a></strong></td>
+                  <td>Date-based, pinned per account, <code>Stripe-Version</code> header override</td>
+                  <td><code>?expand[]=field</code> (dot-notation, depth 4)</td>
+                  <td>Cursor (<code>starting_after</code>)</td>
+                  <td><code>error.type</code> + <code>doc_url</code></td>
+                  <td><span class="pill pill-green">Yes (Idempotency-Key)</span></td>
+                  <td>API key + OAuth</td>
+                  <td><span class="score"><span class="dot">●●●●●</span></span></td>
+                </tr>
+                <tr>
+                  <td><strong><a href="https://docs.github.com/en/rest/using-the-rest-api/getting-started-with-the-rest-api" target="_blank" rel="noopener">GitHub</a></strong></td>
+                  <td>URL path (<code>/v3/</code>, transitioning to header)</td>
+                  <td>Eager embed for frequent relations</td>
+                  <td>Link header RFC 8288 (<code>rel="next"</code>)</td>
+                  <td>Custom JSON <code>message</code> + <code>errors[]</code></td>
+                  <td><span class="pill pill-yellow">Partial (PUT)</span></td>
+                  <td>PAT, OAuth Apps, GitHub Apps (JWT)</td>
+                  <td><span class="score"><span class="dot">●●●●</span><span class="dot-off">●</span></span></td>
+                </tr>
+                <tr>
+                  <td><strong><a href="https://www.twilio.com/docs/usage/api" target="_blank" rel="noopener">Twilio</a></strong></td>
+                  <td>URL path (<code>/2010-04-01/</code>, date-based)</td>
+                  <td>Linked sub-resources</td>
+                  <td>Offset (<code>Page</code>, <code>PageSize</code>)</td>
+                  <td>Custom JSON <code>code</code> + <code>message</code> + <code>more_info</code></td>
+                  <td><span class="pill pill-yellow">No built-in</span></td>
+                  <td>API key + OAuth</td>
+                  <td><span class="score"><span class="dot">●●●●</span><span class="dot-off">●</span></span></td>
+                </tr>
+                <tr>
+                  <td><strong><a href="https://docs.x.com/x-api/fundamentals/rate-limits" target="_blank" rel="noopener">Twitter / X</a></strong></td>
+                  <td>URL path (<code>/2/</code>)</td>
+                  <td><code>?expansions=</code> + <code>?fields=</code></td>
+                  <td>Cursor (<code>next_token</code>)</td>
+                  <td><code>errors[]</code> with <code>type</code>, <code>title</code>, <code>detail</code></td>
+                  <td><span class="pill pill-yellow">No built-in</span></td>
+                  <td>OAuth 2.0 PKCE</td>
+                  <td><span class="score"><span class="dot">●●●</span><span class="dot-off">●●</span></span></td>
+                </tr>
+                <tr>
+                  <td><strong><a href="https://developer.wordpress.org/rest-api/using-the-rest-api/linking-and-embedding/" target="_blank" rel="noopener">WordPress</a></strong></td>
+                  <td>URL path (<code>/wp/v2/</code>)</td>
+                  <td><code>?_embed</code> opt-in (HAL-style)</td>
+                  <td>Offset (<code>page</code>, <code>per_page</code>) + Link header</td>
+                  <td>Custom JSON <code>code</code>, <code>message</code>, <code>data</code></td>
+                  <td><span class="pill pill-yellow">No built-in</span></td>
+                  <td>Cookie, Application Password, OAuth</td>
+                  <td><span class="score"><span class="dot">●●●</span><span class="dot-off">●●</span></span></td>
+                </tr>
+                <tr>
+                  <td><strong><a href="https://shopify.engineering/unifying-graphql-design-patterns-best-practices-tutorials" target="_blank" rel="noopener">Shopify</a></strong></td>
+                  <td>Date-based (<code>2024-04</code>) in URL path</td>
+                  <td>GraphQL (REST deprecated)</td>
+                  <td>Cursor (<code>page_info</code>) + Link header</td>
+                  <td>Custom <code>errors[]</code></td>
+                  <td><span class="pill pill-yellow">No built-in</span></td>
+                  <td>API key + OAuth 2.0</td>
+                  <td><span class="score"><span class="dot">●●●●</span><span class="dot-off">●</span></span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Tab: Patterns -->
+        <div class="tab-panel" id="bm-patterns">
+          <h3>Versioning</h3>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Strategy</th><th>Cacheability</th><th>Browser-friendly</th><th>Adopted by</th><th>Maintenance cost</th><th>Verdict</th></tr></thead>
+              <tbody>
+                <tr><td><strong>URL path</strong> (<code>/v1/</code>)</td><td><span class="pill pill-green">High</span></td><td><span class="pill pill-green">Yes</span></td><td>Google, PayPal, most</td><td>Medium</td><td><span class="pill pill-blue">Most common</span></td></tr>
+                <tr><td><strong>Date-based</strong></td><td><span class="pill pill-green">High</span></td><td><span class="pill pill-green">Yes</span></td><td>Stripe, Shopify, Twilio</td><td>Low (transform modules)</td><td><span class="pill pill-green">Gold standard</span></td></tr>
+                <tr><td><strong>Header</strong></td><td><span class="pill pill-yellow">Low (needs Vary)</span></td><td><span class="pill pill-yellow">No</span></td><td>Microsoft</td><td>Medium</td><td><span class="pill pill-yellow">Niche</span></td></tr>
+                <tr><td><strong>No versioning</strong></td><td><span class="pill pill-green">High</span></td><td><span class="pill pill-green">Yes</span></td><td>Zalando (ideal)</td><td>Very low</td><td><span class="pill pill-green">Ideal if achievable</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3>Pagination</h3>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Pattern</th><th>DB performance</th><th>Consistency</th><th>Random access</th><th>Complexity</th><th>Verdict</th></tr></thead>
+              <tbody>
+                <tr><td><strong>Offset</strong></td><td><span class="pill pill-yellow">O(n) at large offsets</span></td><td><span class="pill pill-yellow">Inconsistent on writes</span></td><td><span class="pill pill-green">Yes</span></td><td>Low</td><td><span class="pill pill-yellow">Small/static datasets only</span></td></tr>
+                <tr><td><strong>Cursor (keyset)</strong></td><td><span class="pill pill-green">O(1) always</span></td><td><span class="pill pill-green">Consistent</span></td><td><span class="pill pill-yellow">No</span></td><td>Medium</td><td><span class="pill pill-green">Production standard</span></td></tr>
+                <tr><td><strong>Page token</strong></td><td><span class="pill pill-green">O(1) with index</span></td><td><span class="pill pill-green">Server-controlled</span></td><td><span class="pill pill-yellow">No</span></td><td>Low</td><td><span class="pill pill-blue">Google-style, simple cursor</span></td></tr>
+                <tr><td><strong>Link header</strong></td><td>Depends on impl</td><td>Depends on impl</td><td>Depends</td><td>Low</td><td><span class="pill pill-blue">Good complement to cursor</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3>Error handling</h3>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Approach</th><th>Standardized</th><th>Machine-readable</th><th>Doc link</th><th>Nested errors</th><th>Verdict</th></tr></thead>
+              <tbody>
+                <tr><td><strong>RFC 9457 Problem Details</strong></td><td><span class="pill pill-green">Yes (IETF)</span></td><td><span class="pill pill-green">Yes</span></td><td><span class="pill pill-yellow">Optional (type URI)</span></td><td><span class="pill pill-green">Via extensions</span></td><td><span class="pill pill-green">Emerging standard</span></td></tr>
+                <tr><td><strong>Stripe</strong></td><td><span class="pill pill-yellow">Proprietary</span></td><td><span class="pill pill-green">Yes (type + code)</span></td><td><span class="pill pill-green">Yes (doc_url)</span></td><td><span class="pill pill-yellow">No</span></td><td><span class="pill pill-green">Best DX in practice</span></td></tr>
+                <tr><td><strong>Google (gRPC Status)</strong></td><td><span class="pill pill-yellow">Google-internal</span></td><td><span class="pill pill-green">Yes (typed details[])</span></td><td><span class="pill pill-yellow">No</span></td><td><span class="pill pill-green">Yes (details[] types)</span></td><td><span class="pill pill-blue">Best for gRPC-REST dual APIs</span></td></tr>
+                <tr><td><strong>Microsoft ErrorResponse</strong></td><td><span class="pill pill-yellow">Proprietary</span></td><td><span class="pill pill-green">Yes (code + target)</span></td><td><span class="pill pill-yellow">No</span></td><td><span class="pill pill-green">Yes (innererror)</span></td><td><span class="pill pill-blue">Best for diagnostics / support</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ─── SECTION: Books & Guides ───────────────────────────────── -->
+      <section id="books">
+        <div class="section-label">References</div>
+        <h2>Books <span class="accent">& Guides</span></h2>
+        <p class="section-intro">The most authoritative books and practitioner guides on REST API design.</p>
+
+        <div class="card-grid">
+          <div class="card">
+            <div class="card-org">O'Reilly · 2013</div>
+            <div class="card-title">RESTful Web APIs</div>
+            <div class="card-body">Richardson, Amundsen & Ruby. Deep theoretical treatment of REST with strong emphasis on hypermedia. Richardson (who created the RMM) and Amundsen (who created Collection+JSON) cover the gap between theory and practice, advocating for real HATEOAS adoption.</div>
+            <div class="card-footer">
+              <span class="badge">theory</span> <span class="badge">hypermedia</span>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-org">O'Reilly · 2011</div>
+            <div class="card-title">REST API Design Rulebook</div>
+            <div class="card-body">Mark Massé. Prescriptive rule-based approach. Covers URI design (use hyphens, lowercase, no trailing slashes), HTTP method semantics, metadata headers, and the WRML framework. Follow rules as a complete set or à la carte.</div>
+            <div class="card-footer">
+              <span class="badge">practical</span> <span class="badge">rules</span>
+              &nbsp;
+              <a class="source-link" href="https://www.oreilly.com/library/view/rest-api-design/9781449317904/" target="_blank" rel="noopener">O'Reilly ↗</a>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-org">Phil Sturgeon · 2014</div>
+            <div class="card-title">Build APIs You Won't Hate</div>
+            <div class="card-body">End-to-end practical guide from planning to production. Covers endpoint theory, serialization, status codes, errors, authorization, versioning, and HATEOAS pragmatics. Opinionated and conversational — written by a developer who's made all the mistakes.</div>
+            <div class="card-footer">
+              <span class="badge">pragmatic</span> <span class="badge">popular</span>
+              &nbsp;
+              <a class="source-link" href="https://apisyouwonthate.com/books/build-apis-you-wont-hate/" target="_blank" rel="noopener">apisyouwonthate.com ↗</a>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-org">O'Reilly · 2018</div>
+            <div class="card-title">Designing Web APIs</div>
+            <div class="card-body">Jin, Sahni & Shevat. Covers request-response and event-driven paradigms, scaling, API-as-product thinking, and developer experience. Case studies from Slack, Stripe, Facebook, Microsoft, GitHub. Strong on the business side of API design.</div>
+            <div class="card-footer">
+              <span class="badge">modern</span> <span class="badge">dx</span>
+              &nbsp;
+              <a class="source-link" href="https://www.oreilly.com/library/view/designing-web-apis/9781492026914/" target="_blank" rel="noopener">O'Reilly ↗</a>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-org">O'Reilly · 2010</div>
+            <div class="card-title">RESTful Web Services Cookbook</div>
+            <div class="card-body">Subbu Allamaraju (eBay platform architect). 100+ problem/solution recipes: URI design, HTTP methods, caching, security, transactions, batch processing, partial updates. Language-agnostic deep practical coverage.</div>
+            <div class="card-footer">
+              <span class="badge">cookbook</span> <span class="badge">patterns</span>
+              &nbsp;
+              <a class="source-link" href="https://www.oreilly.com/library/view/restful-web-services/9780596809140/" target="_blank" rel="noopener">O'Reilly ↗</a>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-org">Vinay Sahni · 2014</div>
+            <div class="card-title">Best Practices for a Pragmatic RESTful API</div>
+            <div class="card-body">The most-cited REST guide online. Opinionated, battle-tested decisions: nouns not verbs, snake_case (20% easier to read per research), SSL everywhere — throw hard errors never redirect, pretty-print by default, embed convention, rate limit headers.</div>
+            <div class="card-footer">
+              <a class="source-link" href="https://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api" target="_blank" rel="noopener">vinaysahni.com ↗</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── SECTION: All Sources ──────────────────────────────────── -->
+      <section id="sources">
+        <div class="section-label">Bibliography</div>
+        <h2>All <span class="accent">Sources</span></h2>
+        <p class="section-intro">Every reference cited in this page, organized by category. All URLs verified April 2026.</p>
+
+        <div class="source-group-title">Foundational Theory</div>
+        <ul class="source-list">
+          <li>
+            <span class="src-title">Fielding Dissertation — Chapter 5: REST (2000)</span>
+            <span class="src-sep">·</span>
+            <a href="https://roy.gbiv.com/pubs/dissertation/rest_arch_style.htm" target="_blank" rel="noopener">roy.gbiv.com/pubs/dissertation/rest_arch_style.htm</a>
+          </li>
+          <li>
+            <span class="src-title">REST APIs must be hypertext-driven — Roy Fielding (2008)</span>
+            <span class="src-sep">·</span>
+            <a href="https://roy.gbiv.com/untangled/2008/rest-apis-must-be-hypertext-driven" target="_blank" rel="noopener">roy.gbiv.com/untangled/2008/rest-apis-must-be-hypertext-driven</a>
+          </li>
+          <li>
+            <span class="src-title">Richardson Maturity Model — Martin Fowler</span>
+            <span class="src-sep">·</span>
+            <a href="https://martinfowler.com/articles/richardsonMaturityModel.html" target="_blank" rel="noopener">martinfowler.com/articles/richardsonMaturityModel.html</a>
+          </li>
+          <li>
+            <span class="src-title">Richardson Maturity Model — Wikipedia</span>
+            <span class="src-sep">·</span>
+            <a href="https://en.wikipedia.org/wiki/Richardson_Maturity_Model" target="_blank" rel="noopener">en.wikipedia.org/wiki/Richardson_Maturity_Model</a>
+          </li>
+          <li>
+            <span class="src-title">Roy Fielding's Misappropriated REST Dissertation — Two Bit History</span>
+            <span class="src-sep">·</span>
+            <a href="https://twobithistory.org/2020/06/28/rest.html" target="_blank" rel="noopener">twobithistory.org/2020/06/28/rest.html</a>
+          </li>
+          <li>
+            <span class="src-title">Understanding HATEOAS — Nordic APIs</span>
+            <span class="src-sep">·</span>
+            <a href="https://nordicapis.com/unraveling-the-mystery-understanding-hateoas/" target="_blank" rel="noopener">nordicapis.com/unraveling-the-mystery-understanding-hateoas/</a>
+          </li>
+        </ul>
+
+        <div class="source-group-title">RFCs & Standards</div>
+        <ul class="source-list">
+          <li>
+            <span class="src-title">RFC 9110 — HTTP Semantics</span>
+            <span class="src-sep">·</span>
+            <a href="https://www.rfc-editor.org/rfc/rfc9110" target="_blank" rel="noopener">rfc-editor.org/rfc/rfc9110</a>
+          </li>
+          <li>
+            <span class="src-title">RFC 9457 — Problem Details for HTTP APIs</span>
+            <span class="src-sep">·</span>
+            <a href="https://www.rfc-editor.org/rfc/rfc9457.html" target="_blank" rel="noopener">rfc-editor.org/rfc/rfc9457.html</a>
+          </li>
+          <li>
+            <span class="src-title">RFC 8288 — Web Linking</span>
+            <span class="src-sep">·</span>
+            <a href="https://www.rfc-editor.org/rfc/rfc8288" target="_blank" rel="noopener">rfc-editor.org/rfc/rfc8288</a>
+          </li>
+          <li>
+            <span class="src-title">RFC 6585 — Additional HTTP Status Codes (429)</span>
+            <span class="src-sep">·</span>
+            <a href="https://www.rfc-editor.org/rfc/rfc6585" target="_blank" rel="noopener">rfc-editor.org/rfc/rfc6585</a>
+          </li>
+          <li>
+            <span class="src-title">RFC 6902 — JSON Patch</span>
+            <span class="src-sep">·</span>
+            <a href="https://www.rfc-editor.org/rfc/rfc6902" target="_blank" rel="noopener">rfc-editor.org/rfc/rfc6902</a>
+          </li>
+          <li>
+            <span class="src-title">RFC 7386 — JSON Merge Patch</span>
+            <span class="src-sep">·</span>
+            <a href="https://www.rfc-editor.org/rfc/rfc7386" target="_blank" rel="noopener">rfc-editor.org/rfc/rfc7386</a>
+          </li>
+        </ul>
+
+        <div class="source-group-title">Formal Specifications</div>
+        <ul class="source-list">
+          <li>
+            <span class="src-title">JSON:API v1.1</span>
+            <span class="src-sep">·</span>
+            <a href="https://jsonapi.org/format/" target="_blank" rel="noopener">jsonapi.org/format/</a>
+          </li>
+          <li>
+            <span class="src-title">JSON:API — Fetching Includes</span>
+            <span class="src-sep">·</span>
+            <a href="https://jsonapi.org/format/#fetching-includes" target="_blank" rel="noopener">jsonapi.org/format/#fetching-includes</a>
+          </li>
+          <li>
+            <span class="src-title">JSON:API — Sparse Fieldsets</span>
+            <span class="src-sep">·</span>
+            <a href="https://jsonapi.org/format/#fetching-sparse-fieldsets" target="_blank" rel="noopener">jsonapi.org/format/#fetching-sparse-fieldsets</a>
+          </li>
+          <li>
+            <span class="src-title">HAL Specification</span>
+            <span class="src-sep">·</span>
+            <a href="https://stateless.group/hal_specification.html" target="_blank" rel="noopener">stateless.group/hal_specification.html</a>
+          </li>
+          <li>
+            <span class="src-title">HAL vs HATEOAS — Baeldung</span>
+            <span class="src-sep">·</span>
+            <a href="https://www.baeldung.com/java-hal-vs-hateoas" target="_blank" rel="noopener">baeldung.com/java-hal-vs-hateoas</a>
+          </li>
+          <li>
+            <span class="src-title">OpenAPI Specification 3.1</span>
+            <span class="src-sep">·</span>
+            <a href="https://spec.openapis.org/oas/v3.1.0" target="_blank" rel="noopener">spec.openapis.org/oas/v3.1.0</a>
+          </li>
+          <li>
+            <span class="src-title">Siren — Hypermedia Specification (Kevin Swiber)</span>
+            <span class="src-sep">·</span>
+            <a href="https://github.com/kevinswiber/siren" target="_blank" rel="noopener">github.com/kevinswiber/siren</a>
+          </li>
+          <li>
+            <span class="src-title">Collection+JSON (Mike Amundsen)</span>
+            <span class="src-sep">·</span>
+            <a href="http://amundsen.com/media-types/collection/format/" target="_blank" rel="noopener">amundsen.com/media-types/collection/format/</a>
+          </li>
+          <li>
+            <span class="src-title">On choosing a hypermedia type — Kevin Sookocheff</span>
+            <span class="src-sep">·</span>
+            <a href="https://sookocheff.com/post/api/on-choosing-a-hypermedia-format/" target="_blank" rel="noopener">sookocheff.com/post/api/on-choosing-a-hypermedia-format/</a>
+          </li>
+        </ul>
+
+        <div class="source-group-title">Industry Design Guides</div>
+        <ul class="source-list">
+          <li>
+            <span class="src-title">Google API Design Guide</span>
+            <span class="src-sep">·</span>
+            <a href="https://cloud.google.com/apis/design" target="_blank" rel="noopener">cloud.google.com/apis/design</a>
+          </li>
+          <li>
+            <span class="src-title">Google AIP-121: Resource-Oriented Design</span>
+            <span class="src-sep">·</span>
+            <a href="https://google.aip.dev/121" target="_blank" rel="noopener">google.aip.dev/121</a>
+          </li>
+          <li>
+            <span class="src-title">Google AIP-157: Partial Responses</span>
+            <span class="src-sep">·</span>
+            <a href="https://google.aip.dev/157" target="_blank" rel="noopener">google.aip.dev/157</a>
+          </li>
+          <li>
+            <span class="src-title">Google Cloud Blog — Use Links Not Keys</span>
+            <span class="src-sep">·</span>
+            <a href="https://cloud.google.com/blog/products/application-development/api-design-why-you-should-use-links-not-keys-to-represent-relationships-in-apis" target="_blank" rel="noopener">cloud.google.com/blog/…use-links-not-keys…</a>
+          </li>
+          <li>
+            <span class="src-title">Microsoft REST API Guidelines (GitHub)</span>
+            <span class="src-sep">·</span>
+            <a href="https://github.com/microsoft/api-guidelines" target="_blank" rel="noopener">github.com/microsoft/api-guidelines</a>
+          </li>
+          <li>
+            <span class="src-title">Zalando RESTful API Guidelines</span>
+            <span class="src-sep">·</span>
+            <a href="https://opensource.zalando.com/restful-api-guidelines/" target="_blank" rel="noopener">opensource.zalando.com/restful-api-guidelines/</a>
+          </li>
+          <li>
+            <span class="src-title">Atlassian REST API Design Guidelines</span>
+            <span class="src-sep">·</span>
+            <a href="https://developer.atlassian.com/server/framework/atlassian-sdk/atlassian-rest-api-design-guidelines-version-1/" target="_blank" rel="noopener">developer.atlassian.com/…rest-api-design-guidelines…</a>
+          </li>
+          <li>
+            <span class="src-title">PayPal API Style Guide</span>
+            <span class="src-sep">·</span>
+            <a href="https://github.com/levid-gc/paypal-api-standards/blob/master/api-style-guide.md" target="_blank" rel="noopener">github.com/levid-gc/paypal-api-standards</a>
+          </li>
+        </ul>
+
+        <div class="source-group-title">Real-World APIs</div>
+        <ul class="source-list">
+          <li>
+            <span class="src-title">Stripe API Reference</span>
+            <span class="src-sep">·</span>
+            <a href="https://docs.stripe.com/api" target="_blank" rel="noopener">docs.stripe.com/api</a>
+          </li>
+          <li>
+            <span class="src-title">Stripe — Expanding Responses</span>
+            <span class="src-sep">·</span>
+            <a href="https://docs.stripe.com/expand" target="_blank" rel="noopener">docs.stripe.com/expand</a>
+          </li>
+          <li>
+            <span class="src-title">Stripe — API Versioning</span>
+            <span class="src-sep">·</span>
+            <a href="https://stripe.com/blog/api-versioning" target="_blank" rel="noopener">stripe.com/blog/api-versioning</a>
+          </li>
+          <li>
+            <span class="src-title">Stripe — Idempotency</span>
+            <span class="src-sep">·</span>
+            <a href="https://stripe.com/blog/idempotency" target="_blank" rel="noopener">stripe.com/blog/idempotency</a>
+          </li>
+          <li>
+            <span class="src-title">GitHub REST API — Getting Started</span>
+            <span class="src-sep">·</span>
+            <a href="https://docs.github.com/en/rest/using-the-rest-api/getting-started-with-the-rest-api" target="_blank" rel="noopener">docs.github.com/en/rest/…getting-started…</a>
+          </li>
+          <li>
+            <span class="src-title">WordPress REST API — Linking and Embedding</span>
+            <span class="src-sep">·</span>
+            <a href="https://developer.wordpress.org/rest-api/using-the-rest-api/linking-and-embedding/" target="_blank" rel="noopener">developer.wordpress.org/rest-api/…linking-and-embedding/</a>
+          </li>
+          <li>
+            <span class="src-title">Twitter/X API — Rate Limits</span>
+            <span class="src-sep">·</span>
+            <a href="https://docs.x.com/x-api/fundamentals/rate-limits" target="_blank" rel="noopener">docs.x.com/x-api/fundamentals/rate-limits</a>
+          </li>
+          <li>
+            <span class="src-title">Twilio — 3 Tips to Build Usable APIs</span>
+            <span class="src-sep">·</span>
+            <a href="https://blogs.mulesoft.com/dev-guides/api-design/twilio-3-tips-to-build-usable-apis/" target="_blank" rel="noopener">blogs.mulesoft.com/…twilio-3-tips-to-build-usable-apis/</a>
+          </li>
+          <li>
+            <span class="src-title">Shopify Engineering — GraphQL Design Patterns</span>
+            <span class="src-sep">·</span>
+            <a href="https://shopify.engineering/unifying-graphql-design-patterns-best-practices-tutorials" target="_blank" rel="noopener">shopify.engineering/…graphql-design-patterns…</a>
+          </li>
+        </ul>
+
+        <div class="source-group-title">Pragmatic Guides & Blog Posts</div>
+        <ul class="source-list">
+          <li>
+            <span class="src-title">Best Practices for a Pragmatic RESTful API — Vinay Sahni</span>
+            <span class="src-sep">·</span>
+            <a href="https://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api" target="_blank" rel="noopener">vinaysahni.com/best-practices-for-a-pragmatic-restful-api</a>
+          </li>
+          <li>
+            <span class="src-title">REST API Design: Resource Modeling — Thoughtworks</span>
+            <span class="src-sep">·</span>
+            <a href="https://www.thoughtworks.com/insights/blog/rest-api-design-resource-modeling" target="_blank" rel="noopener">thoughtworks.com/insights/blog/rest-api-design-resource-modeling</a>
+          </li>
+          <li>
+            <span class="src-title">REST Embedding and Linking — Evert Pot</span>
+            <span class="src-sep">·</span>
+            <a href="https://evertpot.com/rest-embedding-hal-http2/" target="_blank" rel="noopener">evertpot.com/rest-embedding-hal-http2/</a>
+          </li>
+          <li>
+            <span class="src-title">N+1 Problem in REST APIs — restfulapi.net</span>
+            <span class="src-sep">·</span>
+            <a href="https://restfulapi.net/rest-api-n-1-problem/" target="_blank" rel="noopener">restfulapi.net/rest-api-n-1-problem/</a>
+          </li>
+          <li>
+            <span class="src-title">JSON:API Sparse Fieldsets — Aten Design Group</span>
+            <span class="src-sep">·</span>
+            <a href="https://atendesigngroup.com/articles/json-api-getting-just-data-you-need-sparse-fieldsets" target="_blank" rel="noopener">atendesigngroup.com/articles/json-api-…sparse-fieldsets</a>
+          </li>
+          <li>
+            <span class="src-title">RFC 9457 Deep Dive — Codecentric</span>
+            <span class="src-sep">·</span>
+            <a href="https://www.codecentric.de/en/knowledge-hub/blog/charge-your-apis-volume-19-understanding-problem-details-for-http-apis-a-deep-dive-into-rfc-7807-and-rfc-9457" target="_blank" rel="noopener">codecentric.de/…rfc-7807-and-rfc-9457</a>
+          </li>
+        </ul>
+
+        <div class="source-group-title">Books</div>
+        <ul class="source-list">
+          <li>
+            <span class="src-title">RESTful Web APIs — Richardson, Amundsen & Ruby (O'Reilly, 2013)</span>
+            <span class="src-sep">·</span>
+            <a href="https://www.oreilly.com/library/view/restful-web-apis/9781449359713/" target="_blank" rel="noopener">oreilly.com/library/view/restful-web-apis/9781449359713/</a>
+          </li>
+          <li>
+            <span class="src-title">REST API Design Rulebook — Mark Massé (O'Reilly, 2011)</span>
+            <span class="src-sep">·</span>
+            <a href="https://www.oreilly.com/library/view/rest-api-design/9781449317904/" target="_blank" rel="noopener">oreilly.com/library/view/rest-api-design/9781449317904/</a>
+          </li>
+          <li>
+            <span class="src-title">RESTful Web Services Cookbook — Subbu Allamaraju (O'Reilly, 2010)</span>
+            <span class="src-sep">·</span>
+            <a href="https://www.oreilly.com/library/view/restful-web-services/9780596809140/" target="_blank" rel="noopener">oreilly.com/library/view/restful-web-services/9780596809140/</a>
+          </li>
+          <li>
+            <span class="src-title">Build APIs You Won't Hate — Phil Sturgeon (2014)</span>
+            <span class="src-sep">·</span>
+            <a href="https://apisyouwonthate.com/books/build-apis-you-wont-hate/" target="_blank" rel="noopener">apisyouwonthate.com/books/build-apis-you-wont-hate/</a>
+          </li>
+          <li>
+            <span class="src-title">Designing Web APIs — Jin, Sahni & Shevat (O'Reilly, 2018)</span>
+            <span class="src-sep">·</span>
+            <a href="https://www.oreilly.com/library/view/designing-web-apis/9781492026914/" target="_blank" rel="noopener">oreilly.com/library/view/designing-web-apis/9781492026914/</a>
+          </li>
+        </ul>
+
+        <div class="source-group-title">Engineering Blog Posts</div>
+        <ul class="source-list">
+          <li>
+            <span class="src-title">Netflix — Federated GraphQL Architecture</span>
+            <span class="src-sep">·</span>
+            <a href="https://www.apollographql.com/blog/redefining-api-strategy-why-netflix-platform-engineering-chose-federated-graphql" target="_blank" rel="noopener">apollographql.com/blog/…netflix-…federated-graphql</a>
+          </li>
+          <li>
+            <span class="src-title">Uber — Edge Gateway Architecture</span>
+            <span class="src-sep">·</span>
+            <a href="https://www.uber.com/en-IN/blog/architecture-api-gateway/" target="_blank" rel="noopener">uber.com/blog/architecture-api-gateway/</a>
+          </li>
+          <li>
+            <span class="src-title">Airbnb — Building Services at Airbnb</span>
+            <span class="src-sep">·</span>
+            <a href="https://medium.com/airbnb-engineering/building-services-at-airbnb-part-1-c4c1d8fa811b" target="_blank" rel="noopener">medium.com/airbnb-engineering/building-services-at-airbnb-part-1…</a>
+          </li>
+        </ul>
+      </section>
+
+    </main>
+
+    <footer>
+      <a href="../home/">← Home</a>
+      &nbsp;·&nbsp;
+      jbryancondor/learnings
+      &nbsp;·&nbsp;
+      <a href="https://github.com/jbryancondor/learnings" target="_blank" rel="noopener">github.com/jbryancondor/learnings</a>
+    </footer>
+
+  </div><!-- /.page-wrap -->
+
+  <script>
+  (function() {
+    const root = document.documentElement;
+    const btn  = document.getElementById('theme-toggle');
+    const icon = document.getElementById('theme-icon');
+    const mq   = window.matchMedia('(prefers-color-scheme: dark)');
+
+    function applyTheme(theme) {
+      root.setAttribute('data-theme', theme);
+      icon.textContent = theme === 'dark' ? '🌙' : '☀️';
+      localStorage.setItem('theme', theme);
+    }
+
+    // Init: stored > OS > dark
+    const stored = localStorage.getItem('theme');
+    applyTheme(stored || (mq.matches ? 'dark' : 'light'));
+
+    // Respond to OS changes (only if no stored preference)
+    mq.addEventListener('change', function(e) {
+      if (!localStorage.getItem('theme')) applyTheme(e.matches ? 'dark' : 'light');
+    });
+
+    // Toggle on click
+    btn.addEventListener('click', function() {
+      applyTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+    });
+  })();
+
+  // ── Benchmark tabs ──
+  document.querySelectorAll('.tab-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var tabs = btn.closest('section').querySelectorAll('.tab-btn');
+      var panels = btn.closest('section').querySelectorAll('.tab-panel');
+      tabs.forEach(function(t) { t.classList.remove('active'); });
+      panels.forEach(function(p) { p.classList.remove('active'); });
+      btn.classList.add('active');
+      document.getElementById(btn.dataset.tab).classList.add('active');
+    });
+  });
+  </script>
+
+</body>
+</html>
