@@ -1,0 +1,8 @@
+[allowlist]
+description = "False positives — example/documentation values only"
+
+paths = [
+  # All files in these two folders are educational examples, not real credentials
+  '''rest-api-design/''',
+  '''deprecated_rest-api-design/''',
+]
