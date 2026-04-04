@@ -32,6 +32,10 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
+      # Remove deprecated folder — it is not published to GitHub Pages.
+      - name: Remove deprecated folder
+        run: rm -rf deprecated/
+
       # Full repo deploy — deploys every folder on every push to main.
       # TODO (implement later): switch to path-filtered deploys so only
       # changed folders trigger a new deployment, reducing noise and build time.
