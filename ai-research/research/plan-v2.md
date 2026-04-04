@@ -579,7 +579,7 @@ Multiple frameworks describe the progression of AI-assisted engineering. Underst
 
 ## How Agents Should Use This Section
 
-1. **Find your assignment** by agent number (Agent 1–5)
+1. **Find your assignment** by agent number (Agent 1, 2, 3a, 3b, 4, 5)
 2. Each assignment contains everything you need: mission, output folder, confirmed sources, and search queries
 3. **Write output files** to the specified folder using the file schema below
 4. **Priority rule:** Process Q4 2025 and 2026 sources first
@@ -601,8 +601,11 @@ research/
 │   └── <article-slug>.md
 ├── company-cases/                   ← Agent 2: company case studies
 │   └── <company-slug>.md
-├── tools-protocols/                 ← Agent 3: tools, MCP, SDD, harness
-│   └── <tool-slug>.md
+├── tools-protocols/
+│   ├── ide/                         ← Agent 3a: IDE & authoring tools (Levels 1–4)
+│   │   └── <tool-slug>.md
+│   └── infra/                       ← Agent 3b: infrastructure & protocol tools (Levels 5–8)
+│       └── <tool-slug>.md
 ├── orchestration-patterns/          ← Agent 4: multi-agent patterns & architecture
 │   └── <pattern-slug>.md
 └── terminology/                     ← Agent 5: glossary of AI engineering terms
@@ -684,33 +687,56 @@ agent: <agent-name>
 
 ---
 
-## Agent 3 — Tools & Protocols Landscape
+## Agent 3a — IDE & Authoring Tools (Levels 1–4)
 
 | Field | Value |
 |---|---|
-| **Output folder** | `tools-protocols/` |
+| **Output folder** | `tools-protocols/ide/` |
+| **Model** | Sonnet 4.6 |
 | **Priority** | Q4 2025 and 2026 sources first |
-| **Mission** | Map all tools a Generative AI Engineer uses. Cover MCP, IDE tools, SDD tools, memory systems, CLAUDE.md/AGENTS.md patterns, harness tooling. |
+| **Mission** | Map all IDE and authoring tools a Generative AI Engineer uses at Levels 1–4. Cover AI-first IDEs, rules files (CLAUDE.md, AGENTS.md, .cursorrules), and SDD tools (Kiro, Spec-Kit, Tessl). |
 
 **Confirmed sources to process:**
 - Martin Fowler #21 — SDD: Kiro, spec-kit, and Tessl (Oct 2025)
 - Martin Fowler #23 — Context Engineering for Coding Agents (Feb 2026)
-- Martin Fowler #24 — Harness Engineering — first thoughts (Feb 2026)
+- Martin Fowler #18 — Partner with the AI, throw away the code (Jul 2025)
+- Martin Fowler #19 — To vibe or not to vibe (Sep 2025)
+- Martin Fowler #20 — Anchoring AI to a reference application (Sep 2025)
 - GitHub Spec-Kit — spec-driven.md
 - Thoughtworks — SDD blog post
-- Amplifi Labs — Definitive Glossary (MCP, RAG, Tool Calling etc.)
-- The New Stack — Memory for AI Agents (2025)
 - Spotify Honk Part 2 — Context Engineering deep dive
 
 **Search queries:**
-- "Model Context Protocol MCP" tools ecosystem 2025 2026
-- Claude Code CLAUDE.md AGENTS.md best practices
-- Amazon Kiro SDD IDE 2025
-- Tessl AI-first IDE 2025
+- Claude Code CLAUDE.md AGENTS.md best practices 2025 2026
+- Amazon Kiro SDD IDE review 2025
+- Tessl AI-first IDE spec-driven 2025
 - Cursor vs Windsurf vs Claude Code comparison 2026
+- GitHub Copilot Workspace agentic features 2025
+
+---
+
+## Agent 3b — Infrastructure & Protocol Tools (Levels 5–8)
+
+| Field | Value |
+|---|---|
+| **Output folder** | `tools-protocols/infra/` |
+| **Model** | Sonnet 4.6 |
+| **Priority** | Q4 2025 and 2026 sources first |
+| **Mission** | Map all infrastructure-level tools: MCP ecosystem, A2A protocol, memory systems, harness/observability tooling. These are the tools that operate at and above Level 5. |
+
+**Confirmed sources to process:**
+- Martin Fowler #24 — Harness Engineering — first thoughts (Feb 2026)
+- Amplifi Labs — Definitive Glossary (MCP, RAG, Tool Calling etc.)
+- The New Stack — Memory for AI Agents (2025)
+
+**Search queries:**
+- "Model Context Protocol MCP" ecosystem servers 2025 2026
+- MCPM MCP package manager CLI
 - MemGPT Mem0 MemOS memory systems comparison 2025
-- LLM observability tools LangSmith Langfuse 2025 2026
-- Harness engineering AI agents tools
+- LLM observability tools LangSmith Langfuse Helicone 2025 2026
+- A2A Agent-to-Agent protocol Google Linux Foundation 2025
+- Harness engineering AI agents observability tools
+- PulseMCP MCP registry 2026
 
 ---
 
@@ -808,10 +834,11 @@ _Level 8 (Autonomous Agent Teams):_
 
 ## Agent Status Dashboard
 
-| Agent | Mission | Output Folder | Status | Files Created |
-|---|---|---|---|---|
-| Agent 1 | Taxonomies & Frameworks | `taxonomies/` | `pending` | 0 |
-| Agent 2 | Company Case Studies | `company-cases/` | `pending` | 0 |
-| Agent 3 | Tools & Protocols | `tools-protocols/` | `pending` | 0 |
-| Agent 4 | Orchestration Patterns | `orchestration-patterns/` | `pending` | 0 |
-| Agent 5 | Terminology Glossary | `terminology/` | `pending` | 0 |
+| Agent | Mission | Output Folder | Model | Status | Files Created |
+|---|---|---|---|---|---|
+| Agent 1 | Taxonomies & Frameworks | `taxonomies/` | Sonnet 4.6 | `pending` | 0 |
+| Agent 2 | Company Case Studies | `company-cases/` | Sonnet 4.6 | `pending` | 0 |
+| Agent 3a | IDE & Authoring Tools (L1–4) | `tools-protocols/ide/` | Sonnet 4.6 | `pending` | 0 |
+| Agent 3b | Infrastructure & Protocol Tools (L5–8) | `tools-protocols/infra/` | Sonnet 4.6 | `pending` | 0 |
+| Agent 4 | Orchestration Patterns | `orchestration-patterns/` | Sonnet 4.6 | `pending` | 0 |
+| Agent 5 | Terminology Glossary | `terminology/` | Haiku 4.5 | `pending` | 0 |
