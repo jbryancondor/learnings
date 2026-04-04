@@ -298,6 +298,22 @@ Each row = one source file. Format:
 
 ---
 
+## Model Selection per Task
+
+Use this split strategy to balance quality and cost across the research sprint.
+
+| Model | Use for | Avoid for |
+|---|---|---|
+| **claude-haiku-4-5** | Web searches, URL fetching, quick summarizations, Agent 5 terminology lookups | Complex cross-source reasoning or final synthesis |
+| **claude-sonnet-4-6** | Writing research files, synthesizing multiple sources, cross-concept reasoning | High-volume simple lookups (wasteful) |
+| **claude-opus-4-6** | Final synthesis pass — "turn all research into a learning guide" — after research is done | Individual research tasks (overkill) |
+
+**Default rule:** spawn all 5 research agents on **Sonnet 4.6**. If an agent is doing pure search/fetch with no synthesis (e.g., only terminology lookups), you can use **Haiku** to save cost.
+
+**Cost estimate for this research sprint:** $8–15 depending on depth. The planning phase (this session) cost $3.18 for reference.
+
+---
+
 Now read `plan-v2.md`, then spawn the 5 agents in parallel and begin the research.
 
 ## PROMPT END
