@@ -836,7 +836,7 @@ _Level 8 (Autonomous Agent Teams):_
 
 | Agent | Mission | Output Folder | Model | Status | Files Created |
 |---|---|---|---|---|---|
-| Agent 1 | Taxonomies & Frameworks | `taxonomies/` | Sonnet 4.6 | `pending` | 0 |
+| Agent 1 | Taxonomies & Frameworks | `taxonomies/` | Opus 4.6 | `pending` | 0 |
 | Agent 2 | Company Case Studies | `company-cases/` | Sonnet 4.6 | `pending` | 0 |
 | Agent 3a | IDE & Authoring Tools (L1–4) | `tools-protocols/ide/` | Sonnet 4.6 | `pending` | 0 |
 | Agent 3b | Infrastructure & Protocol Tools (L5–8) | `tools-protocols/infra/` | Sonnet 4.6 | `pending` | 0 |
